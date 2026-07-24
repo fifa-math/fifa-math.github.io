@@ -1,0 +1,233 @@
+---
+// src/components/GlobeVisualizer.astro
+---
+<div class="globe-container" role="figure" aria-label="Global Club Dominance 3D Globe Visualization" class="w-full h-[600px] border border-gray-200 rounded-lg bg-slate-900 relative flex flex-col items-center overflow-hidden">
+  
+  <div class="absolute top-4 left-4 z-10 bg-slate-800/90 p-3 rounded-lg border border-slate-700">
+    <div class="text-sm font-bold text-white mb-2">Top 50 Clubs Worldwide</div>
+    <div class="flex flex-col space-y-2">
+      <button id="btn-attendance" class="globe-btn px-3 py-1 bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold rounded text-left transition-colors">By Attendance</button>
+      <button id="btn-revenue" class="globe-btn px-3 py-1 bg-slate-700 hover:bg-slate-600 text-white text-xs font-semibold rounded text-left transition-colors">By Revenue</button>
+      <button id="btn-viewership" class="globe-btn px-3 py-1 bg-slate-700 hover:bg-slate-600 text-white text-xs font-semibold rounded text-left transition-colors">By TV Viewership</button>
+    </div>
+    <div class="text-[10px] text-green-400 mt-3 text-center">Drag to spin the globe</div>
+  </div>
+
+  <div id="globe-canvas" class="w-full h-full cursor-move relative"></div>
+</div>
+
+<script>
+  import * as d3 from 'd3';
+  import * as topojson from 'topojson-client';
+
+  document.querySelectorAll('.globe-container:not(.initialized)').forEach(container => {
+    container.classList.add('initialized');
+    let hasRendered = false;
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting && !hasRendered) {
+          hasRendered = true;
+          renderGlobe();
+          observer.disconnect();
+        }
+      });
+    }, { threshold: 0.1 });
+
+    observer.observe(container);
+
+    async function renderGlobe() {
+      const canvas = container.querySelector('#globe-canvas');
+      if (!canvas) return;
+
+      const width = canvas.clientWidth;
+      const height = canvas.clientHeight;
+      const center: [number, number] = [width / 2, height / 2];
+
+      const svg = d3.select(canvas)
+        .append('svg')
+        .attr('width', '100%')
+        .attr('height', '100%')
+        .attr('viewBox', `0 0 ${width} ${height}`);
+
+      // Projection for 3D Globe
+      const projection = d3.geoOrthographic()
+        .scale(Math.min(width, height) / 2.2)
+        .translate(center)
+        .rotate([-10, -50, 0]); // Start focused on Europe
+
+      const path = d3.geoPath().projection(projection);
+
+      // Add ocean background circle
+      svg.append("circle")
+        .attr("cx", center[0])
+        .attr("cy", center[1])
+        .attr("r", projection.scale())
+        .attr("fill", "#0f172a") // slate-900
+        .attr("stroke", "rgba(255,255,255,0.1)");
+
+      const landGroup = svg.append("g");
+      const dataGroup = svg.append("g");
+
+      // Load TopoJSON for world map (async)
+      let world: any;
+      try {
+        const response = await fetch('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json');
+        world = await response.json();
+      } catch (e) {
+        console.error("Failed to load map data", e);
+        return;
+      }
+
+      // Draw countries
+      const countries = topojson.feature(world, world.objects.countries).features;
+      const landPaths = landGroup.selectAll("path")
+        .data(countries)
+        .enter()
+        .append("path")
+        .attr("d", path as any)
+        .attr("fill", "#1e293b") // slate-800
+        .attr("stroke", "#334155")
+        .attr("stroke-width", 0.5);
+
+      // Generate 50 Clubs Data (Mocked clustering in Europe, South America, etc.)
+      const clubs: {name: string, lat: number, lng: number, attendance: number, revenue: number, viewership: number}[] = [
+        // Europe (Heavy concentration)
+        { name: "Man United", lat: 53.46, lng: -2.28, attendance: 73000, revenue: 800, viewership: 900 },
+        { name: "Real Madrid", lat: 40.45, lng: -3.68, attendance: 75000, revenue: 830, viewership: 950 },
+        { name: "Barcelona", lat: 41.38, lng: 2.12, attendance: 83000, revenue: 800, viewership: 920 },
+        { name: "Bayern Munich", lat: 48.21, lng: 11.62, attendance: 75000, revenue: 740, viewership: 750 },
+        { name: "PSG", lat: 48.84, lng: 2.25, attendance: 47000, revenue: 650, viewership: 600 },
+        { name: "Arsenal", lat: 51.55, lng: -0.10, attendance: 60000, revenue: 530, viewership: 700 },
+        { name: "Liverpool", lat: 53.43, lng: -2.96, attendance: 61000, revenue: 680, viewership: 850 },
+        { name: "Man City", lat: 53.48, lng: -2.20, attendance: 53000, revenue: 730, viewership: 780 },
+        { name: "Juventus", lat: 45.10, lng: 7.64, attendance: 41000, revenue: 430, viewership: 500 },
+        { name: "AC Milan", lat: 45.47, lng: 9.12, attendance: 71000, revenue: 350, viewership: 450 },
+        { name: "Inter Milan", lat: 45.47, lng: 9.12, attendance: 73000, revenue: 380, viewership: 460 },
+        { name: "Dortmund", lat: 51.49, lng: 7.45, attendance: 81000, revenue: 390, viewership: 400 },
+        { name: "Chelsea", lat: 51.48, lng: -0.19, attendance: 40000, revenue: 580, viewership: 650 },
+        { name: "Spurs", lat: 51.60, lng: -0.06, attendance: 61000, revenue: 540, viewership: 550 },
+        { name: "Atletico", lat: 40.43, lng: -3.59, attendance: 58000, revenue: 390, viewership: 400 },
+        // South America
+        { name: "Flamengo", lat: -22.91, lng: -43.22, attendance: 60000, revenue: 200, viewership: 350 },
+        { name: "River Plate", lat: -34.54, lng: -58.44, attendance: 84000, revenue: 150, viewership: 250 },
+        { name: "Boca Juniors", lat: -34.63, lng: -58.36, attendance: 54000, revenue: 140, viewership: 240 },
+        { name: "Corinthians", lat: -23.54, lng: -46.47, attendance: 40000, revenue: 160, viewership: 200 },
+        // North America
+        { name: "Atlanta Utd", lat: 33.75, lng: -84.40, attendance: 47000, revenue: 100, viewership: 80 },
+        { name: "Club America", lat: 19.30, lng: -99.15, attendance: 55000, revenue: 120, viewership: 150 },
+        // Asia
+        { name: "Urawa Reds", lat: 35.90, lng: 139.71, attendance: 35000, revenue: 80, viewership: 60 },
+        { name: "Guangzhou", lat: 23.14, lng: 113.26, attendance: 45000, revenue: 90, viewership: 100 }
+        // For visual density, let's randomly generate the remaining 27 in Europe
+      ];
+
+      for (let i = 0; i < 27; i++) {
+        // Europe approx bounds: lat 35 to 55, lng -10 to 20
+        clubs.push({
+          name: `EU Club ${i}`,
+          lat: 35 + Math.random() * 20,
+          lng: -10 + Math.random() * 30,
+          attendance: 30000 + Math.random() * 30000,
+          revenue: 100 + Math.random() * 300,
+          viewership: 100 + Math.random() * 200
+        });
+      }
+
+      let currentMetric = 'attendance'; // 'attendance' | 'revenue' | 'viewership'
+
+      function updateDataPoints() {
+        const maxVal = d3.max(clubs, d => d[currentMetric as keyof typeof d] as number) || 1;
+        const scale = d3.scaleSqrt().domain([0, maxVal]).range([0, 15]);
+
+        const circles = dataGroup.selectAll("circle.club")
+          .data(clubs);
+
+        circles.enter()
+          .append("circle")
+          .attr("class", "club")
+          .merge(circles as any)
+          .transition()
+          .duration(1000)
+          .attr("r", d => scale(d[currentMetric as keyof typeof d] as number))
+          .attr("fill", () => {
+            if (currentMetric === 'attendance') return "rgba(59, 130, 246, 0.6)"; // Blue
+            if (currentMetric === 'revenue') return "rgba(234, 179, 8, 0.6)"; // Yellow
+            return "rgba(239, 68, 68, 0.6)"; // Red
+          })
+          .attr("stroke", "#ffffff")
+          .attr("stroke-width", 1);
+          
+        drawPositions();
+      }
+
+      function drawPositions() {
+        // Project lat/lng to x/y. Hide if behind the globe.
+        dataGroup.selectAll("circle.club")
+          .attr("cx", (d: any) => {
+            const p = projection([d.lng, d.lat]);
+            return p ? p[0] : 0;
+          })
+          .attr("cy", (d: any) => {
+            const p = projection([d.lng, d.lat]);
+            return p ? p[1] : 0;
+          })
+          .style("display", (d: any) => {
+            // Check if point is behind the globe
+            const center = projection.invert ? projection.invert([width/2, height/2]) : [0,0];
+            const p = projection([d.lng, d.lat]);
+            
+            // A simple approximation: if distance from center > 90 degrees, hide it
+            if (center && d3.geoDistance(center, [d.lng, d.lat]) > 1.57) return "none";
+            return "block";
+          });
+      }
+
+      // Drag behavior for rotation
+      const drag = d3.drag<SVGSVGElement, any>()
+        .on("drag", (event) => {
+          const rotate = projection.rotate();
+          const k = 100 / projection.scale();
+          projection.rotate([
+            rotate[0] + event.dx * k,
+            rotate[1] - event.dy * k,
+            rotate[2]
+          ]);
+          
+          landPaths.attr("d", path as any);
+          drawPositions();
+        });
+
+      svg.call(drag);
+
+      // Button listeners
+      const btns = container.querySelectorAll('.globe-btn');
+      
+      const setMetric = (metric: string, activeBtn: Element) => {
+        currentMetric = metric;
+        btns.forEach(b => {
+          b.classList.remove('bg-blue-600', 'hover:bg-blue-500');
+          b.classList.add('bg-slate-700', 'hover:bg-slate-600');
+        });
+        activeBtn.classList.remove('bg-slate-700', 'hover:bg-slate-600');
+        activeBtn.classList.add('bg-blue-600', 'hover:bg-blue-500');
+        updateDataPoints();
+      };
+
+      container.querySelector('#btn-attendance')?.addEventListener('click', function() { setMetric('attendance', this); });
+      container.querySelector('#btn-revenue')?.addEventListener('click', function() { setMetric('revenue', this); });
+      container.querySelector('#btn-viewership')?.addEventListener('click', function() { setMetric('viewership', this); });
+
+      // Initial draw
+      updateDataPoints();
+      
+      // Auto-spin slowly
+      d3.timer(() => {
+        const rotate = projection.rotate();
+        projection.rotate([rotate[0] + 0.2, rotate[1], rotate[2]]);
+        landPaths.attr("d", path as any);
+        drawPositions();
+      });
+    }
+  });
+</script>

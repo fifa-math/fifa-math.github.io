@@ -1,0 +1,150 @@
+---
+// src/components/RAEVisualizer.astro
+---
+<div class="rae-container" role="figure" aria-label="Relative Age Effect Distribution Visualization" class="w-full h-[450px] border border-gray-200 rounded-lg bg-slate-800 relative flex flex-col p-4">
+  <div class="absolute top-4 left-4 z-10 pointer-events-none">
+    <div class="text-sm font-bold text-white mb-2">Birth Quarter Distribution</div>
+    <div class="flex items-center space-x-2">
+      <div class="w-4 h-4 bg-blue-500 rounded-sm"></div>
+      <div class="text-xs text-gray-300">Elite Academy Players</div>
+    </div>
+    <div class="flex items-center space-x-2 mt-1">
+      <div class="w-4 h-4 bg-gray-500 rounded-sm"></div>
+      <div class="text-xs text-gray-300">General Population</div>
+    </div>
+  </div>
+
+  <div id="rae-chart" class="w-full h-full mt-10 relative"></div>
+</div>
+
+<script>
+  import * as d3 from 'd3';
+
+  document.querySelectorAll('.rae-container:not(.initialized)').forEach(container => {
+    container.classList.add('initialized');
+    let hasRendered = false;
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting && !hasRendered) {
+          hasRendered = true;
+          renderChart();
+          observer.disconnect();
+        }
+      });
+    }, { threshold: 0.1 });
+
+    observer.observe(container);
+
+    function renderChart() {
+      const chartArea = container.querySelector('#rae-chart');
+      if (!chartArea) return;
+
+      const width = chartArea.clientWidth;
+      const height = chartArea.clientHeight;
+      const margin = { top: 20, right: 30, bottom: 40, left: 50 };
+      const innerW = width - margin.left - margin.right;
+      const innerH = height - margin.top - margin.bottom;
+
+      const svg = d3.select(chartArea)
+        .append('svg')
+        .attr('width', '100%')
+        .attr('height', '100%')
+        .attr('viewBox', `0 0 ${width} ${height}`)
+        .append('g')
+        .attr('transform', `translate(${margin.left},${margin.top})`);
+
+      // Data: Birth Quarters
+      const data = [
+        { quarter: 'Q1 (Jan-Mar)', pop: 25, elite: 43 },
+        { quarter: 'Q2 (Apr-Jun)', pop: 25, elite: 30 },
+        { quarter: 'Q3 (Jul-Sep)', pop: 25, elite: 17 },
+        { quarter: 'Q4 (Oct-Dec)', pop: 25, elite: 10 },
+      ];
+
+      const quarters = data.map(d => d.quarter);
+      
+      const xScale = d3.scaleBand()
+        .domain(quarters)
+        .range([0, innerW])
+        .padding(0.2);
+        
+      const xScaleInner = d3.scaleBand()
+        .domain(['pop', 'elite'])
+        .range([0, xScale.bandwidth()])
+        .padding(0.05);
+
+      const yScale = d3.scaleLinear()
+        .domain([0, 50])
+        .range([innerH, 0]);
+
+      // X Axis
+      svg.append("g")
+        .attr("transform", `translate(0,${innerH})`)
+        .call(d3.axisBottom(xScale))
+        .attr("color", "#94a3b8")
+        .selectAll("text")
+        .style("font-size", "12px");
+
+      // Y Axis
+      svg.append("g")
+        .call(d3.axisLeft(yScale).ticks(5).tickFormat(d => d + "%"))
+        .attr("color", "#94a3b8");
+        
+      // Grid lines
+      svg.append("g")
+        .attr("class", "grid")
+        .call(d3.axisLeft(yScale).tickSize(-innerW).tickFormat(() => ""))
+        .attr("color", "rgba(255,255,255,0.1)")
+        .style("stroke-dasharray", "3,3");
+
+      const quarterGroups = svg.selectAll(".quarter")
+        .data(data)
+        .enter()
+        .append("g")
+        .attr("class", "quarter")
+        .attr("transform", d => `translate(${xScale(d.quarter)},0)`);
+
+      // General Population Bars (Gray)
+      quarterGroups.append("rect")
+        .attr("x", xScaleInner('pop') || 0)
+        .attr("y", innerH)
+        .attr("width", xScaleInner.bandwidth())
+        .attr("height", 0)
+        .attr("fill", "#64748b")
+        .transition()
+        .duration(800)
+        .attr("y", d => yScale(d.pop))
+        .attr("height", d => innerH - yScale(d.pop));
+
+      // Elite Academy Bars (Blue)
+      quarterGroups.append("rect")
+        .attr("x", xScaleInner('elite') || 0)
+        .attr("y", innerH)
+        .attr("width", xScaleInner.bandwidth())
+        .attr("height", 0)
+        .attr("fill", "#3b82f6")
+        .transition()
+        .duration(1200)
+        .delay((d, i) => i * 200 + 400) // Staggered animation
+        .attr("y", d => yScale(d.elite))
+        .attr("height", d => innerH - yScale(d.elite));
+        
+      // Labels for Elite
+      quarterGroups.append("text")
+        .attr("x", (xScaleInner('elite') || 0) + xScaleInner.bandwidth() / 2)
+        .attr("y", innerH)
+        .text(d => d.elite + "%")
+        .attr("text-anchor", "middle")
+        .style("fill", "white")
+        .style("font-size", "11px")
+        .style("font-weight", "bold")
+        .style("opacity", 0)
+        .transition()
+        .duration(1200)
+        .delay((d, i) => i * 200 + 400)
+        .attr("y", d => yScale(d.elite) - 5)
+        .style("opacity", 1);
+    }
+  });
+</script>

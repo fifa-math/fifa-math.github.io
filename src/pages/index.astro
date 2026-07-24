@@ -1,26 +1,29 @@
 ---
-
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { getCollection, render } from 'astro:content';
+import TableOfContents from '../components/TableOfContents.astro';
 
 const claims = (await getCollection('claims')).filter(c => c.data.published === true);
-// Sort claims by claimNumber
+// Get all published claims and sort them by claimNumber
 claims.sort((a, b) => a.data.claimNumber - b.data.claimNumber);
 ---
 <BaseLayout title="FIFA Math: The Science of Soccer">
   <div class="text-center mb-12">
-    <h1 class="text-4xl font-extrabold text-blue-400 mb-4">The Mathematics of Soccer</h1>
-    <p class="text-lg text-slate-300">
-      Exploring the physics, geometry, and statistical realities of the beautiful game.
+    <h1 class="text-4xl font-extrabold text-blue-400 mb-4">Welcome to FIFA Math</h1>
+    <p class="text-xl text-slate-300 max-w-2xl mx-auto mb-8">
+      Exploring the beautiful game through the lens of data science, probability, and advanced analytics. 
+      Below are {claims.length} mathematical claims that prove soccer is as much about numbers as it is about skill.
     </p>
   </div>
 
-  <div class="space-y-12">
+  <TableOfContents claims={claims} />
+
+  <div class="space-y-16">
     {claims.map(async (claim) => {
       const { Content } = await render(claim);
       return (
-        <article class="bg-slate-800 p-8 rounded-2xl shadow-xl border border-slate-700">
-          <header class="mb-6 border-b border-slate-700 pb-4">
+        <article id={`claim-${claim.data.claimNumber}`} class="bg-slate-800 rounded-2xl shadow-xl border border-slate-700 overflow-hidden transform transition duration-500 hover:shadow-2xl hover:border-slate-600 scroll-mt-24">
+          <header class="p-8 pb-4">
             <h2 class="text-2xl font-bold text-white mb-2">Claim #{claim.data.claimNumber}: {claim.data.title}</h2>
             <p class="text-slate-400 italic mb-2">{claim.data.description}</p>
             <div class="flex flex-wrap gap-2 mt-3">

@@ -1,0 +1,25 @@
+---
+title: "Global Club Dominance"
+description: "Visualizing the geographic concentration of soccer's wealth, viewership, and attendance."
+claimNumber: 33
+mathConcepts: ["Geospatial Plotting", "Concentration Ratios"]
+published: true
+---
+import GlobeVisualizer from '../../components/GlobeVisualizer.astro';
+
+Soccer is universally considered the world's game, played in over 200 countries. Yet mathematically, the distribution of wealth, talent, and viewership is fiercely concentrated in a tiny geographic footprint.
+
+## The European Oligopoly
+
+When we map the top 50 clubs in the world by revenue, attendance, and global TV viewership, a stark pattern emerges. Despite the sport's global reach, the financial gravity of the sport pulls almost exclusively toward Western Europe, specifically England, Spain, Germany, and Italy.
+
+<div class="my-8">
+  <GlobeVisualizer />
+</div>
+
+This geographic concentration acts as a mathematical feedback loop:
+1. Higher local viewership and legacy attendance generate massive television broadcast contracts.
+2. The broadcast revenue allows these clubs to buy the best players in the world from South America and Africa.
+3. The accumulation of the world's best players attracts an even larger *global* TV viewership, further enriching the same concentrated group of clubs.
+
+By spinning the globe above, you can visually observe how the financial weight of the entire sporting world rests on just a few dozen coordinate points.

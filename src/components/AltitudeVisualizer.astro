@@ -1,0 +1,179 @@
+---
+// src/components/AltitudeVisualizer.astro
+---
+<div class="altitude-container" role="figure" aria-label="Altitude Win Probability Visualization" class="w-full h-[450px] border border-gray-200 rounded-lg bg-slate-800 relative flex flex-col p-4">
+  <div class="absolute top-4 left-4 z-10 pointer-events-none">
+    <div class="text-sm font-bold text-white mb-2">Home Win Probability by Altitude</div>
+    <div class="flex items-center space-x-2">
+      <div class="w-3 h-3 bg-red-500 rounded-full"></div>
+      <div class="text-xs text-gray-300">La Paz, Bolivia (3,600m)</div>
+    </div>
+    <div class="flex items-center space-x-2 mt-1">
+      <div class="w-3 h-3 bg-blue-400 rounded-full"></div>
+      <div class="text-xs text-gray-300">Global Average Baseline</div>
+    </div>
+  </div>
+
+  <div id="altitude-chart" class="w-full h-full mt-8 relative"></div>
+</div>
+
+<script>
+  import * as d3 from 'd3';
+
+  document.querySelectorAll('.altitude-container:not(.initialized)').forEach(container => {
+    container.classList.add('initialized');
+    let hasRendered = false;
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting && !hasRendered) {
+          hasRendered = true;
+          renderChart();
+          observer.disconnect();
+        }
+      });
+    }, { threshold: 0.1 });
+
+    observer.observe(container);
+
+    function renderChart() {
+      const chartArea = container.querySelector('#altitude-chart');
+      if (!chartArea) return;
+
+      const width = chartArea.clientWidth;
+      const height = chartArea.clientHeight;
+      const margin = { top: 20, right: 30, bottom: 50, left: 60 };
+      const innerW = width - margin.left - margin.right;
+      const innerH = height - margin.top - margin.bottom;
+
+      const svg = d3.select(chartArea)
+        .append('svg')
+        .attr('width', '100%')
+        .attr('height', '100%')
+        .attr('viewBox', `0 0 ${width} ${height}`)
+        .append('g')
+        .attr('transform', `translate(${margin.left},${margin.top})`);
+
+      // Mock Data: Altitude (m) vs Win Probability (%)
+      const data = [
+        { city: "Buenos Aires", alt: 25, prob: 54 },
+        { city: "Rio de Janeiro", alt: 10, prob: 55 },
+        { city: "Lima", alt: 154, prob: 52 },
+        { city: "Santiago", alt: 520, prob: 56 },
+        { city: "Asunción", alt: 43, prob: 53 },
+        { city: "Caracas", alt: 900, prob: 55 },
+        { city: "Montevideo", alt: 43, prob: 54 },
+        { city: "Bogotá", alt: 2640, prob: 71 },
+        { city: "Quito", alt: 2850, prob: 75 },
+        { city: "La Paz", alt: 3640, prob: 82.5 },
+      ];
+
+      const xScale = d3.scaleLinear()
+        .domain([0, 4000])
+        .range([0, innerW]);
+
+      const yScale = d3.scaleLinear()
+        .domain([40, 90])
+        .range([innerH, 0]);
+
+      // X Axis
+      svg.append("g")
+        .attr("transform", `translate(0,${innerH})`)
+        .call(d3.axisBottom(xScale).ticks(5).tickFormat(d => d + "m"))
+        .attr("color", "#94a3b8");
+        
+      svg.append("text")
+        .attr("x", innerW / 2)
+        .attr("y", innerH + 40)
+        .style("text-anchor", "middle")
+        .style("fill", "#94a3b8")
+        .style("font-size", "12px")
+        .text("Stadium Altitude (Meters)");
+
+      // Y Axis
+      svg.append("g")
+        .call(d3.axisLeft(yScale).ticks(5).tickFormat(d => d + "%"))
+        .attr("color", "#94a3b8");
+        
+      svg.append("text")
+        .attr("transform", "rotate(-90)")
+        .attr("x", -innerH / 2)
+        .attr("y", -45)
+        .style("text-anchor", "middle")
+        .style("fill", "#94a3b8")
+        .style("font-size", "12px")
+        .text("Home Win Probability");
+
+      // Draw baseline line
+      svg.append("line")
+        .attr("x1", 0).attr("y1", yScale(53.7))
+        .attr("x2", innerW).attr("y2", yScale(53.7))
+        .attr("stroke", "rgba(59, 130, 246, 0.5)")
+        .attr("stroke-width", 2)
+        .attr("stroke-dasharray", "5,5");
+
+      // Draw points
+      const circles = svg.selectAll("circle")
+        .data(data)
+        .enter()
+        .append("circle")
+        .attr("cx", d => xScale(d.alt))
+        .attr("cy", d => yScale(40)) // start at bottom
+        .attr("r", 6)
+        .attr("fill", d => d.city === "La Paz" ? "#ef4444" : "#3b82f6")
+        .attr("stroke", "#ffffff")
+        .attr("stroke-width", 1)
+        .style("opacity", 0);
+
+      // Animate points up to their probability
+      circles.transition()
+        .duration(1500)
+        .delay((d, i) => i * 150)
+        .attr("cy", d => yScale(d.prob))
+        .style("opacity", 0.9);
+
+      // Labels for high altitude cities
+      svg.selectAll(".city-label")
+        .data(data.filter(d => d.alt > 2000))
+        .enter()
+        .append("text")
+        .attr("x", d => xScale(d.alt) - 10)
+        .attr("y", d => yScale(d.prob) - 10)
+        .text(d => `${d.city} (${d.prob}%)`)
+        .attr("text-anchor", "end")
+        .style("fill", "white")
+        .style("font-size", "11px")
+        .style("font-weight", "bold")
+        .style("opacity", 0)
+        .transition()
+        .duration(1500)
+        .delay(1500)
+        .style("opacity", 1);
+        
+      // Trendline calculation
+      const xMean = d3.mean(data, d => d.alt) || 0;
+      const yMean = d3.mean(data, d => d.prob) || 0;
+      let num = 0, den = 0;
+      data.forEach(d => {
+        num += (d.alt - xMean) * (d.prob - yMean);
+        den += (d.alt - xMean) * (d.alt - xMean);
+      });
+      const m = num / den;
+      const b = yMean - m * xMean;
+
+      // Draw trendline
+      svg.append("line")
+        .attr("x1", xScale(0))
+        .attr("y1", yScale(b))
+        .attr("x2", xScale(0))
+        .attr("y2", yScale(b)) // Start collapsed
+        .attr("stroke", "rgba(255,255,255,0.4)")
+        .attr("stroke-width", 2)
+        .transition()
+        .delay(2000)
+        .duration(1000)
+        .attr("x2", xScale(4000))
+        .attr("y2", yScale(m * 4000 + b));
+    }
+  });
+</script>
