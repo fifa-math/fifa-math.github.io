@@ -1,0 +1,26 @@
+---
+title: "The Optimal Pass Sequence"
+description: "Debunking the Tiki-Taka myth: why the vast majority of goals are scored in 2 to 3 passes."
+claimNumber: 22
+mathConcepts: ["Right-Skewed Distributions"]
+published: true
+---
+import BarChartVisualizer from '../../components/BarChartVisualizer.astro';
+
+When people think of beautiful, dominant football, they often picture "Tiki-Taka"—a style popularized by Pep Guardiola's Barcelona, where the team completes 30+ passes before scoring an incredible team goal. 
+
+However, mathematically, these long sequences are incredibly rare outliers.
+
+## The Right-Skewed Reality
+
+If we chart the number of consecutive passes made immediately before a goal is scored, the resulting histogram forms a heavily **Right-Skewed Distribution**. 
+
+The mode (the most frequent occurrence) is actually **2 to 3 passes**. 
+
+Why? Because the most mathematically efficient way to score is during the chaotic "Transition Window" immediately after winning the ball. It only takes one vertical pass to bypass the midfield, and one final pass to set up the striker. By the time a team reaches pass number 10, the defense has organized, the space has vanished, and the probability of scoring has plummeted. 
+
+## The Pass Distribution Histogram
+
+Below is a visualization charting the percentage of total goals scored against the length of the pass sequence leading up to it. Notice how the vast majority of goals are scored before the 5th pass is ever made.
+
+<BarChartVisualizer />

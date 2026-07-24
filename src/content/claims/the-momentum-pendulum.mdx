@@ -1,0 +1,27 @@
+---
+title: "The Momentum Pendulum"
+description: "Visualizing the mathematical flow of a match and the correlation of sustained pressure to goals."
+claimNumber: 20
+mathConcepts: ["Moving Averages", "Time-Series Analysis"]
+published: true
+---
+import MomentumVisualizer from '../../components/MomentumVisualizer.astro';
+
+Pundits constantly talk about "momentum shifting" during a match. While this sounds like a purely psychological concept, data scientists actually track momentum strictly as a mathematical time-series.
+
+## Calculating Momentum
+
+Momentum is calculated minute-by-minute using a weighted moving average of several factors:
+- **Field Tilt**: Percentage of final-third passes.
+- **Expected Threat (xT) generation**: The danger level of those passes.
+- **Successful Defensive Actions**: Recoveries in the opponent's half.
+
+When we plot this on a diverging area chart, we see the momentum pendulum swing wildly above and below the zero-axis between the home and away teams. 
+
+Statistically, a goal rarely happens in isolation. It is almost always preceded by a sustained 3-to-5-minute peak of positive momentum (intense, localized pressure in the attacking third), which finally breaks the defensive probability model.
+
+## The Visual Flow of the Match
+
+Below is an abstract visualization of a 90-minute match. The blue area represents the home team's momentum, and the red represents the away team's. Notice the massive spike in blue momentum right before the breakthrough goal is scored at the 45th minute.
+
+<MomentumVisualizer />

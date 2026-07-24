@@ -1,0 +1,122 @@
+---
+// src/components/MarkovVisualizer.astro
+---
+<div id="markov-container" class="w-full h-[400px] border border-gray-200 rounded-lg bg-slate-800 relative">
+</div>
+
+<script>
+  import * as d3 from 'd3';
+
+  const container = document.getElementById('markov-container');
+  
+  if (container) {
+    const width = container.clientWidth;
+    const height = container.clientHeight;
+
+    const svg = d3.select(container)
+      .append('svg')
+      .attr('width', '100%')
+      .attr('height', '100%')
+      .attr('viewBox', `0 0 ${width} ${height}`);
+      
+    // Define arrow markers for graph links
+    svg.append("defs").selectAll("marker")
+      .data(["end"])
+      .enter().append("marker")
+      .attr("id", String)
+      .attr("viewBox", "0 -5 10 10")
+      .attr("refX", 25)
+      .attr("refY", 0)
+      .attr("markerWidth", 6)
+      .attr("markerHeight", 6)
+      .attr("orient", "auto")
+      .append("path")
+      .attr("fill", "#94a3b8")
+      .attr("d", "M0,-5L10,0L0,5");
+
+    const nodes = [
+      { id: "Defense", x: width * 0.15, y: height * 0.5, radius: 40, color: "#3b82f6" },
+      { id: "Midfield", x: width * 0.5, y: height * 0.3, radius: 45, color: "#eab308" },
+      { id: "Attack", x: width * 0.85, y: height * 0.5, radius: 40, color: "#ef4444" },
+      { id: "Turnover", x: width * 0.5, y: height * 0.8, radius: 35, color: "#64748b" },
+      { id: "Goal", x: width * 0.85, y: height * 0.15, radius: 30, color: "#22c55e" }
+    ];
+
+    const links = [
+      { source: nodes[0], target: nodes[1], prob: "70%" },
+      { source: nodes[0], target: nodes[3], prob: "20%" },
+      { source: nodes[0], target: nodes[2], prob: "10%" },
+      
+      { source: nodes[1], target: nodes[2], prob: "40%" },
+      { source: nodes[1], target: nodes[3], prob: "45%" },
+      { source: nodes[1], target: nodes[0], prob: "15%" },
+      
+      { source: nodes[2], target: nodes[4], prob: "5%" },
+      { source: nodes[2], target: nodes[3], prob: "75%" },
+      { source: nodes[2], target: nodes[1], prob: "20%" },
+    ];
+
+    // Draw links
+    const link = svg.append("g")
+      .attr("fill", "none")
+      .attr("stroke", "#94a3b8")
+      .attr("stroke-width", 2)
+      .selectAll("path")
+      .data(links)
+      .enter().append("path")
+      .attr("marker-end", "url(#end)")
+      .attr("d", d => {
+        const dx = d.target.x - d.source.x;
+        const dy = d.target.y - d.source.y;
+        const dr = Math.sqrt(dx * dx + dy * dy) * 1.5; // Curve radius
+        return `M${d.source.x},${d.source.y}A${dr},${dr} 0 0,1 ${d.target.x},${d.target.y}`;
+      });
+
+    // Draw link labels
+    const linkLabels = svg.append("g")
+      .selectAll("text")
+      .data(links)
+      .enter().append("text")
+      .attr("x", d => {
+        const dx = d.target.x - d.source.x;
+        const dy = d.target.y - d.source.y;
+        const dr = Math.sqrt(dx * dx + dy * dy) * 1.5;
+        // Approximation for curved path midpoint
+        return (d.source.x + d.target.x) / 2 - (dy/dr)*20;
+      })
+      .attr("y", d => {
+        const dx = d.target.x - d.source.x;
+        const dy = d.target.y - d.source.y;
+        const dr = Math.sqrt(dx * dx + dy * dy) * 1.5;
+        return (d.source.y + d.target.y) / 2 + (dx/dr)*20;
+      })
+      .text(d => d.prob)
+      .attr("fill", "#cbd5e1")
+      .attr("font-size", "12px")
+      .attr("text-anchor", "middle");
+
+    // Draw nodes
+    const node = svg.append("g")
+      .selectAll("circle")
+      .data(nodes)
+      .enter().append("circle")
+      .attr("cx", d => d.x)
+      .attr("cy", d => d.y)
+      .attr("r", d => d.radius)
+      .attr("fill", d => d.color);
+
+    // Node labels
+    const labels = svg.append("g")
+      .selectAll("text")
+      .data(nodes)
+      .enter().append("text")
+      .attr("x", d => d.x)
+      .attr("y", d => d.y)
+      .attr("dy", "0.35em")
+      .attr("text-anchor", "middle")
+      .text(d => d.id)
+      .attr("fill", "white")
+      .attr("font-size", "14px")
+      .attr("font-weight", "bold");
+  }
+</script>

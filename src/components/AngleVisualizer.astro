@@ -1,0 +1,154 @@
+---
+// src/components/AngleVisualizer.astro
+export interface Props {
+  goalWidth: number;
+}
+const { goalWidth } = Astro.props;
+---
+<div class="w-full flex flex-col items-center">
+  <div id="angle-info" class="text-xl font-bold mb-4 text-blue-400">Angle: 0°</div>
+  <div id="angle-container" class="w-full h-[500px] border border-gray-200 rounded-lg bg-green-800 relative cursor-crosshair overflow-hidden" data-goal-width={goalWidth}>
+  </div>
+  <p class="mt-2 text-sm text-gray-400">Drag the white dot along the right flank to see the angle change.</p>
+</div>
+
+<script>
+  import * as d3 from 'd3';
+
+  const container = document.getElementById('angle-container');
+  const info = document.getElementById('angle-info');
+  
+  if (container && info) {
+    const goalWidth = parseFloat(container.dataset.goalWidth || '7.32');
+    // Scale: 1 unit = 1 meter. Let's make the container represent roughly 40m x 40m
+    const width = container.clientWidth;
+    const height = container.clientHeight;
+    
+    // Create scales
+    const xScale = d3.scaleLinear().domain([-20, 20]).range([0, width]);
+    // Origin (0,0) is center of goal line at top. y goes down to 40
+    const yScale = d3.scaleLinear().domain([0, 40]).range([0, height]);
+    
+    const svg = d3.select(container)
+      .append('svg')
+      .attr('width', '100%')
+      .attr('height', '100%');
+      
+    // Draw goal line
+    svg.append('line')
+      .attr('x1', 0)
+      .attr('y1', yScale(0))
+      .attr('x2', width)
+      .attr('y2', yScale(0))
+      .attr('stroke', 'white')
+      .attr('stroke-width', 2);
+      
+    // Draw goal
+    const leftPostX = -goalWidth / 2;
+    const rightPostX = goalWidth / 2;
+    
+    svg.append('line')
+      .attr('x1', xScale(leftPostX))
+      .attr('y1', yScale(0))
+      .attr('x2', xScale(rightPostX))
+      .attr('y2', yScale(0))
+      .attr('stroke', '#ef4444')
+      .attr('stroke-width', 6);
+      
+    // Goal posts
+    svg.append('circle').attr('cx', xScale(leftPostX)).attr('cy', yScale(0)).attr('r', 4).attr('fill', 'white');
+    svg.append('circle').attr('cx', xScale(rightPostX)).attr('cy', yScale(0)).attr('r', 4).attr('fill', 'white');
+    
+    // Attacker initial position (running down the wing, e.g., 10m from near post)
+    // If right post is at W/2 (3.66), 10m from near post means x = 13.66.
+    // Let's constrain the attacker to x = 13.66.
+    const attackerX = rightPostX + 10; 
+    let attackerY = 25; // initial y
+    
+    // Draw running line
+    svg.append('line')
+      .attr('x1', xScale(attackerX))
+      .attr('y1', 0)
+      .attr('x2', xScale(attackerX))
+      .attr('y2', height)
+      .attr('stroke', 'rgba(255,255,255,0.3)')
+      .attr('stroke-dasharray', '5,5');
+      
+    // Draw sightlines
+    const lineLeft = svg.append('line')
+      .attr('stroke', 'rgba(59, 130, 246, 0.8)')
+      .attr('stroke-width', 2);
+      
+    const lineRight = svg.append('line')
+      .attr('stroke', 'rgba(59, 130, 246, 0.8)')
+      .attr('stroke-width', 2);
+      
+    // Attacker point
+    const attackerPoint = svg.append('circle')
+      .attr('cx', xScale(attackerX))
+      .attr('cy', yScale(attackerY))
+      .attr('r', 8)
+      .attr('fill', 'white')
+      .attr('cursor', 'grab');
+      
+    function update(y: number) {
+      attackerY = Math.max(0.1, Math.min(40, y)); // constrain to 0.1-40m
+      
+      const pX = attackerX;
+      const pY = attackerY;
+      
+      // Update DOM
+      attackerPoint.attr('cy', yScale(pY));
+      lineLeft
+        .attr('x1', xScale(pX))
+        .attr('y1', yScale(pY))
+        .attr('x2', xScale(leftPostX))
+        .attr('y2', yScale(0));
+      lineRight
+        .attr('x1', xScale(pX))
+        .attr('y1', yScale(pY))
+        .attr('x2', xScale(rightPostX))
+        .attr('y2', yScale(0));
+        
+      // Calculate angle
+      // Vector A (to left post)
+      const ax = leftPostX - pX;
+      const ay = 0 - pY;
+      // Vector B (to right post)
+      const bx = rightPostX - pX;
+      const by = 0 - pY;
+      
+      const dot = ax * bx + ay * by;
+      const magA = Math.sqrt(ax * ax + ay * ay);
+      const magB = Math.sqrt(bx * bx + by * by);
+      
+      const cosTheta = dot / (magA * magB);
+      const angleRad = Math.acos(cosTheta);
+      const angleDeg = angleRad * (180 / Math.PI);
+      
+      info!.textContent = `Angle: ${angleDeg.toFixed(2)}° (Distance to goal line: ${pY.toFixed(1)}m)`;
+      
+      // Highlight optimal (approx 13.15m)
+      if (Math.abs(pY - 13.15) < 0.5) {
+        info!.classList.add('text-green-400');
+        info!.classList.remove('text-blue-400');
+        attackerPoint.attr('fill', '#4ade80');
+      } else {
+        info!.classList.add('text-blue-400');
+        info!.classList.remove('text-green-400');
+        attackerPoint.attr('fill', 'white');
+      }
+    }
+    
+    // Drag behavior
+    const drag = d3.drag<SVGCircleElement, unknown>()
+      .on('drag', (event) => {
+        update(yScale.invert(event.y));
+      });
+      
+    attackerPoint.call(drag as any);
+    
+    // Initial draw
+    update(attackerY);
+  }
+</script>

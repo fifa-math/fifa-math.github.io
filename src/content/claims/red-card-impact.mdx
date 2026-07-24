@@ -1,0 +1,28 @@
+---
+title: "The Mathematical Impact of a Red Card"
+description: "Analyzing the likelihood of winning, losing, or drawing depending on the exact minute a red card is issued."
+claimNumber: 13
+mathConcepts: ["Conditional Probability", "Survival Analysis"]
+published: true
+---
+import LineChartVisualizer from '../../components/LineChartVisualizer.astro';
+
+When a team goes down to 10 men, they are mathematically at a severe disadvantage. However, the probability of them losing is entirely dependent on the variable $t$, the minute the red card was issued.
+
+## Survival Analysis
+
+We can model the probability of a team holding onto a draw or a win using survival analysis. If a team receives a red card in the 10th minute, they must "survive" for 80 minutes against a superior force. 
+
+The conditional probability of winning given a red card at time $t$ can be expressed as:
+
+$$ P(Win | Red Card, Minute=t) $$
+
+If $t < 20$, the win probability plummets to roughly 15%, while the loss probability skyrockets. The defending team is eventually mathematically overwhelmed by the physical toll of covering the extra space. 
+
+However, as $t$ approaches 90, the impact of the red card diminishes exponentially. A red card in the 88th minute barely alters the expected outcome of the match, as there simply isn't enough time ($90 - t$) for the opposing team to capitalize on the spatial advantage.
+
+## The Inflection Point
+
+Below is an interactive chart demonstrating how the probabilities of a Win, Draw, and Loss evolve depending on the minute a team receives a red card. Notice the inflection point around the 70th minute—this is where teams are mathematically capable of "parking the bus" and absorbing pressure without collapsing.
+
+<LineChartVisualizer />

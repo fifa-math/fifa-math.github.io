@@ -1,0 +1,128 @@
+---
+// src/components/PoissonVisualizer.astro
+export interface Props {
+  lambda: number;
+}
+const { lambda } = Astro.props;
+---
+<div id="poisson-container" class="w-full h-[400px] border border-gray-200 rounded-lg bg-slate-800" data-lambda={lambda}>
+</div>
+
+<script>
+  import * as d3 from 'd3';
+
+  // Astro scripts execute once per page load unless we handle Astro view transitions,
+  // but for a static page this is fine.
+  
+  function factorial(n: number): number {
+    if (n === 0 || n === 1) return 1;
+    let result = 1;
+    for (let i = 2; i <= n; i++) result *= i;
+    return result;
+  }
+
+  function poissonProbability(lambda: number, k: number): number {
+    return (Math.pow(Math.E, -lambda) * Math.pow(lambda, k)) / factorial(k);
+  }
+
+  const container = document.getElementById('poisson-container');
+  
+  if (container) {
+    const lambda = parseFloat(container.dataset.lambda || '1.2');
+    
+    // Generate data for 0 to 6 goals
+    const data = d3.range(0, 7).map(k => ({
+      goals: k,
+      prob: poissonProbability(lambda, k)
+    }));
+    
+    const margin = {top: 40, right: 30, bottom: 50, left: 60};
+    const width = container.clientWidth - margin.left - margin.right;
+    const height = container.clientHeight - margin.top - margin.bottom;
+
+    const svg = d3.select(container)
+      .append('svg')
+      .attr('width', '100%')
+      .attr('height', '100%')
+      .attr('viewBox', `0 0 ${width + margin.left + margin.right} ${height + margin.top + margin.bottom}`)
+      .append('g')
+      .attr('transform', `translate(${margin.left},${margin.top})`);
+      
+    const x = d3.scaleBand()
+      .domain(data.map(d => d.goals.toString()))
+      .range([0, width])
+      .padding(0.2);
+      
+    const y = d3.scaleLinear()
+      .domain([0, (d3.max(data, d => d.prob) || 0) * 1.2])
+      .nice()
+      .range([height, 0]);
+
+    // X axis
+    svg.append("g")
+      .attr("transform", `translate(0,${height})`)
+      .call(d3.axisBottom(x))
+      .attr("color", "#94a3b8")
+      .selectAll("text")
+      .style("font-size", "14px");
+
+    // X axis label
+    svg.append("text")
+      .attr("text-anchor", "middle")
+      .attr("x", width / 2)
+      .attr("y", height + 40)
+      .text("Number of Goals")
+      .style("fill", "#94a3b8");
+
+    // Y axis
+    svg.append("g")
+      .call(d3.axisLeft(y).tickFormat(d3.format(".0%")))
+      .attr("color", "#94a3b8")
+      .selectAll("text")
+      .style("font-size", "14px");
+      
+    // Y axis label
+    svg.append("text")
+      .attr("text-anchor", "middle")
+      .attr("transform", "rotate(-90)")
+      .attr("y", -45)
+      .attr("x", -height / 2)
+      .text("Probability")
+      .style("fill", "#94a3b8");
+
+    // Bars
+    svg.selectAll("rect")
+      .data(data)
+      .enter()
+      .append("rect")
+      .attr("x", d => x(d.goals.toString()) || 0)
+      .attr("y", d => y(d.prob))
+      .attr("width", x.bandwidth())
+      .attr("height", d => height - y(d.prob))
+      .attr("fill", "#3b82f6")
+      .attr("rx", 4);
+      
+    // Labels on top of bars
+    svg.selectAll(".label")
+      .data(data)
+      .enter()
+      .append("text")
+      .attr("class", "label")
+      .attr("x", d => (x(d.goals.toString()) || 0) + x.bandwidth() / 2)
+      .attr("y", d => y(d.prob) - 10)
+      .attr("text-anchor", "middle")
+      .text(d => d3.format(".1%")(d.prob))
+      .style("fill", "#f8fafc")
+      .style("font-size", "12px");
+      
+    // Title
+    svg.append("text")
+      .attr("x", width / 2)
+      .attr("y", -20)
+      .attr("text-anchor", "middle")
+      .style("font-size", "18px")
+      .style("font-weight", "bold")
+      .style("fill", "#f8fafc")
+      .text(`Poisson Distribution (λ = ${lambda})`);
+  }
+</script>

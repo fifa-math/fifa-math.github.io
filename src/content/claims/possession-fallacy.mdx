@@ -1,0 +1,26 @@
+---
+title: "The Possession Fallacy"
+description: "Why raw possession percentages have a very weak correlation with winning, and what actually matters."
+claimNumber: 8
+mathConcepts: ["Linear Regression", "Correlation Coefficient"]
+published: true
+---
+import ScatterPlotVisualizer from '../../components/ScatterPlotVisualizer.astro';
+
+Pundits love to talk about possession. "They dominated the ball," they say, pointing to a team holding 70% possession. However, mathematically, raw possession percentages have a surprisingly weak correlation with actually winning games.
+
+## The Math Behind the Fallacy
+
+If we take the possession percentage $x$ and the win rate $y$ of teams across a season, we can calculate the Pearson correlation coefficient ($r$):
+
+$$ r = \frac{\sum (x_i - \bar{x})(y_i - \bar{y})}{\sqrt{\sum (x_i - \bar{x})^2 \sum (y_i - \bar{y})^2}} $$
+
+When we run this on top-flight European leagues, $r$ often hovers around 0.3 to 0.4. This is a weak positive correlation. Why? Because a team holding 70% possession in their own defensive third generates exactly zero expected goals (xG). 
+
+Instead of raw possession, mathematicians look at **Field Tilt**, which measures the share of possession strictly in the final third.
+
+## Visualizing the Weak Correlation
+
+Below is a scatter plot visualizing a synthetic dataset of 40 teams, charting their average possession against their win rate. The red dashed line shows the linear regression trend, which reveals how weakly the two variables are actually linked.
+
+<ScatterPlotVisualizer />

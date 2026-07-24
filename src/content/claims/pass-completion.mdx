@@ -1,0 +1,25 @@
+---
+title: "Forward vs Backward Pass Completion"
+description: "Why a 95% backward pass completion rate is statistically inferior to a 60% forward pass completion rate."
+claimNumber: 12
+mathConcepts: ["Expected Threat (xT)"]
+published: true
+---
+
+A central defender might finish a match with a 98% pass completion rate and receive praise from pundits. However, modern soccer mathematics views raw pass completion as a fundamentally flawed metric because it treats all passes equally.
+
+## Expected Threat (xT)
+
+To solve this, analysts introduced **Expected Threat (xT)**. This model divides the pitch into a grid. For every cell on the grid, there is a historical probability of a possession resulting in a goal from that location.
+
+When a player makes a pass, they change the ball's location from cell $A$ to cell $B$. The xT of the pass is simply the difference in the goal probability of those two cells:
+
+$$ xT = \text{Probability}(Goal | B) - \text{Probability}(Goal | A) $$
+
+## The Mathematics of Progression
+
+Backward passes (and many sideways passes) naturally move the ball into cells with a *lower* probability of scoring. Therefore, their xT is often negative. Completing 100 backward passes might result in a 100% completion rate, but a net negative Expected Threat.
+
+Conversely, passing the ball directly into the opponent's penalty box carries a high risk of interception. A playmaker like Kevin De Bruyne might only complete 60% of his forward, progressive passes. However, the successful 60% move the ball into zones with such a massively high xT multiplier that his net offensive contribution dwarfs the defender's 98% completion rate.
+
+The math proves that possession without progression is structurally useless.

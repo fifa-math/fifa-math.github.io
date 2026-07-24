@@ -1,0 +1,39 @@
+---
+
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getCollection, render } from 'astro:content';
+
+const claims = await getCollection('claims');
+// Sort claims by claimNumber
+claims.sort((a, b) => a.data.claimNumber - b.data.claimNumber);
+---
+<BaseLayout title="FIFA Math: The Science of Soccer">
+  <div class="text-center mb-12">
+    <h1 class="text-4xl font-extrabold text-blue-400 mb-4">The Mathematics of Soccer</h1>
+    <p class="text-lg text-slate-300">
+      Exploring the physics, geometry, and statistical realities of the beautiful game.
+    </p>
+  </div>
+
+  <div class="space-y-12">
+    {claims.map(async (claim) => {
+      const { Content } = await render(claim);
+      return (
+        <article class="bg-slate-800 p-8 rounded-2xl shadow-xl border border-slate-700">
+          <header class="mb-6 border-b border-slate-700 pb-4">
+            <h2 class="text-2xl font-bold text-white mb-2">Claim #{claim.data.claimNumber}: {claim.data.title}</h2>
+            <p class="text-slate-400 italic mb-2">{claim.data.description}</p>
+            <div class="flex flex-wrap gap-2 mt-3">
+              {claim.data.mathConcepts.map(concept => (
+                <span class="px-2 py-1 bg-blue-900 text-blue-200 text-xs rounded-full font-semibold">{concept}</span>
+              ))}
+            </div>
+          </header>
+          <div class="prose prose-invert prose-blue max-w-none prose-img:rounded-xl">
+            <Content />
+          </div>
+        </article>
+      );
+    })}
+  </div>
+</BaseLayout>

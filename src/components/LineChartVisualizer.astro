@@ -1,0 +1,96 @@
+---
+// src/components/LineChartVisualizer.astro
+---
+<div id="linechart-container" class="w-full h-[400px] border border-gray-200 rounded-lg bg-slate-800 relative">
+</div>
+
+<script>
+  import * as d3 from 'd3';
+
+  const container = document.getElementById('linechart-container');
+  
+  if (container) {
+    const width = container.clientWidth;
+    const height = container.clientHeight;
+    const margin = {top: 20, right: 30, bottom: 40, left: 50};
+    
+    const innerWidth = width - margin.left - margin.right;
+    const innerHeight = height - margin.top - margin.bottom;
+
+    const svg = d3.select(container)
+      .append('svg')
+      .attr('width', '100%')
+      .attr('height', '100%')
+      .attr('viewBox', `0 0 ${width} ${height}`)
+      .append('g')
+      .attr('transform', `translate(${margin.left},${margin.top})`);
+
+    // Synthetic data for Win, Tie, Loss probability depending on minute of red card.
+    // Early red card: Win probability is very low, Loss is high.
+    // Late red card: Win probability approaches baseline (assumed tied game at time of card, 
+    // or rather, average across all game states at that minute).
+    
+    const data = d3.range(0, 91, 5).map(minute => {
+      // Base probabilities at minute 0 (Red card at kickoff)
+      let win = 15 + (minute / 90) * 20; // 15% to 35%
+      let tie = 25 + (minute / 90) * 5;  // 25% to 30%
+      let loss = 100 - win - tie;        // 60% down to 35%
+      return { minute, win, tie, loss };
+    });
+
+    const x = d3.scaleLinear()
+      .domain([0, 90])
+      .range([0, innerWidth]);
+
+    const y = d3.scaleLinear()
+      .domain([0, 100])
+      .range([innerHeight, 0]);
+
+    // X Axis
+    svg.append("g")
+      .attr("transform", `translate(0,${innerHeight})`)
+      .call(d3.axisBottom(x).tickValues(d3.range(0, 91, 15)))
+      .attr("color", "#94a3b8");
+
+    svg.append("text")
+      .attr("x", innerWidth / 2)
+      .attr("y", innerHeight + 35)
+      .attr("fill", "#94a3b8")
+      .attr("text-anchor", "middle")
+      .text("Minute of Red Card");
+
+    // Y Axis
+    svg.append("g")
+      .call(d3.axisLeft(y).tickFormat(d => d + "%"))
+      .attr("color", "#94a3b8");
+
+    svg.append("text")
+      .attr("transform", "rotate(-90)")
+      .attr("x", -innerHeight / 2)
+      .attr("y", -35)
+      .attr("fill", "#94a3b8")
+      .attr("text-anchor", "middle")
+      .text("Probability");
+
+    // Line generators
+    const lineWin = d3.line<any>().x(d => x(d.minute)).y(d => y(d.win)).curve(d3.curveMonotoneX);
+    const lineTie = d3.line<any>().x(d => x(d.minute)).y(d => y(d.tie)).curve(d3.curveMonotoneX);
+    const lineLoss = d3.line<any>().x(d => x(d.minute)).y(d => y(d.loss)).curve(d3.curveMonotoneX);
+
+    svg.append("path").datum(data).attr("fill", "none").attr("stroke", "#22c55e").attr("stroke-width", 3).attr("d", lineWin);
+    svg.append("path").datum(data).attr("fill", "none").attr("stroke", "#eab308").attr("stroke-width", 3).attr("d", lineTie);
+    svg.append("path").datum(data).attr("fill", "none").attr("stroke", "#ef4444").attr("stroke-width", 3).attr("d", lineLoss);
+
+    // Legend
+    const legend = svg.append("g").attr("transform", `translate(${innerWidth - 80}, 10)`);
+    
+    legend.append("rect").attr("x", 0).attr("y", 0).attr("width", 10).attr("height", 10).attr("fill", "#22c55e");
+    legend.append("text").attr("x", 15).attr("y", 10).text("Win").attr("fill", "#cbd5e1").style("font-size", "12px");
+    
+    legend.append("rect").attr("x", 0).attr("y", 20).attr("width", 10).attr("height", 10).attr("fill", "#eab308");
+    legend.append("text").attr("x", 15).attr("y", 30).text("Draw").attr("fill", "#cbd5e1").style("font-size", "12px");
+    
+    legend.append("rect").attr("x", 0).attr("y", 40).attr("width", 10).attr("height", 10).attr("fill", "#ef4444");
+    legend.append("text").attr("x", 15).attr("y", 50).text("Loss").attr("fill", "#cbd5e1").style("font-size", "12px");
+  }
+</script>

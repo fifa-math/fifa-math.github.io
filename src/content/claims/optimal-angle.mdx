@@ -1,0 +1,41 @@
+---
+title: "The Geometry of Beating the Goalkeeper"
+description: "Why the optimal distance to shoot from the goal line is exactly the geometric mean of your distances to the near and far posts along the x-axis."
+claimNumber: 4
+mathConcepts: ["Trigonometry", "Calculus", "Optimization"]
+published: true
+---
+import AngleVisualizer from '../../components/AngleVisualizer.astro';
+
+When an attacker is running parallel to the sideline, deep in the opponent's half, they face a geometric dilemma:
+- If they shoot from too far away, the distance gives the goalkeeper too much time to react.
+- If they dribble too close to the goal line, the angle becomes too narrow, effectively making the goal "shrink" to zero.
+
+There is a single, mathematically optimal point along their run where the visible angle of the goal is at its absolute maximum.
+
+## The Trigonometric Setup
+
+Let the goal line be the x-axis, and the goal width be $W$. The attacker's distance from the goal line is $x$, and their line of approach is at a perpendicular distance $D$ from the near post.
+
+The visible shooting angle $\theta$ is the difference between the angles to the far post and the near post:
+$$ \theta = \theta_{far} - \theta_{near} $$
+
+## The Optimization Calculus
+
+To maximize $\theta$, we can maximize $\tan(\theta)$ using the tangent difference identity:
+$$ \tan(\theta) = \frac{\tan(\theta_{far}) - \tan(\theta_{near})}{1 + \tan(\theta_{far})\tan(\theta_{near})} $$
+
+Substituting our geometric values ($\frac{D+W}{x}$ and $\frac{D}{x}$):
+$$ \tan(\theta) = \frac{\frac{D+W}{x} - \frac{D}{x}}{1 + \left(\frac{D+W}{x}\right)\left(\frac{D}{x}\right)} = \frac{Wx}{x^2 + D(D + W)} $$
+
+To maximize this function, we can divide the numerator and denominator by $x$, then apply the AM-GM inequality to find that the denominator is minimized when:
+$$ x = \sqrt{D(D + W)} $$
+
+This simple equation proves that the optimal distance to shoot from the goal line is exactly the geometric mean of your distances to the near and far posts along the x-axis.
+
+## Interactive Visualization
+
+Below is an interactive visualization of a winger running down the flank 10 meters outside the near post ($D = 10$). The goal is 7.32 meters wide ($W = 7.32$). 
+The optimal distance is $x = \sqrt{10(10 + 7.32)} \approx 13.16$ meters.
+
+<AngleVisualizer goalWidth={7.32} />

@@ -1,0 +1,32 @@
+---
+title: "Raw Numbers vs Capacity Percentage"
+description: "Mathematically proving why a 10,000-seat stadium at 100% capacity feels louder than an 80,000-seat stadium with 10,000 fans."
+claimNumber: 16
+mathConcepts: ["Logarithmic Growth", "Exponential Growth"]
+published: true
+---
+import MultiCurveVisualizer from '../../components/MultiCurveVisualizer.astro';
+
+How do we measure the "Atmosphere" of a stadium? Most people assume it's directly correlated to the raw number of fans present. However, acoustic engineers and psychologists model this very differently.
+
+## The Logarithmic Return of Raw Volume
+
+If you place 10,000 fans in a massive 80,000-seat stadium, the raw decibel output is high, but the *perceived atmosphere* is awful. This is because the relationship between raw fan count and atmospheric pressure follows a **Logarithmic Curve**. 
+
+The jump from 1,000 fans to 10,000 fans creates a massive spike in perceived noise. But the jump from 60,000 fans to 70,000 fans offers severely diminishing returns.
+
+$$ Atmosphere_{raw} \approx \log(Fans) $$
+
+## The Exponential Power of Density
+
+To create an intimidating atmosphere, **Density (Capacity Percentage)** is mathematically far more powerful than raw volume. 
+
+A 10,000-seat stadium packed to exactly 100% capacity traps acoustic energy. The physical proximity of the fans creates an exponential feedback loop of crowd chanting (social contagion).
+
+$$ Atmosphere_{density} \approx e^{(Fans / Capacity)} $$
+
+## Comparing the Curves
+
+Below, we visualize two abstract curves. The blue line represents the diminishing logarithmic returns of simply adding more fans to a cavernous stadium. The pink line represents the exponential growth of acoustic density as a stadium approaches 100% full capacity.
+
+<MultiCurveVisualizer />

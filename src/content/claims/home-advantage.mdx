@@ -1,0 +1,28 @@
+---
+title: "Quantifying Home Advantage"
+description: "Examining the mathematical drop in home advantage during COVID-19 'ghost games'."
+claimNumber: 10
+mathConcepts: ["Poisson Regression", "Statistical Significance"]
+published: true
+---
+
+Historically, home teams in professional football win roughly 46% of their matches, while away teams win only 26% (with the rest being draws). This implies a massive structural advantage. 
+
+We can quantify this advantage using a **Poisson regression model** to predict the number of goals scored by team $i$ against team $j$:
+
+$$ \lambda_{ij} = \exp(\alpha_i + \beta_j + \gamma \cdot \text{Home}_{ij}) $$
+
+Where:
+- $\alpha_i$ is the attacking strength of team $i$.
+- $\beta_j$ is the defensive weakness of team $j$.
+- $\gamma$ is the home advantage parameter.
+
+## The COVID-19 Experiment
+
+For decades, statisticians debated the source of the home advantage: travel fatigue, pitch familiarity, or crowd noise? 
+
+The COVID-19 pandemic inadvertently provided the perfect mathematical control group: **"Ghost Games"** (matches played in empty stadiums).
+
+When statisticians ran the Poisson regression on the COVID-19 data, the $\gamma$ parameter dropped by nearly half. The home win rate plummeted from 46% to just 41%. 
+
+Deeper analysis revealed that without crowd noise, the statistical discrepancy in foul calls and yellow cards issued against the away team almost completely disappeared. The math proved that the primary driver of home advantage wasn't player morale or travel—it was the psychological pressure the crowd exerted on the referee's decision-making matrix.

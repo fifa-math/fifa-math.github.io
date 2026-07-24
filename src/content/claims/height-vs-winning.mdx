@@ -1,0 +1,24 @@
+---
+title: "The Height Distribution Paradox"
+description: "Why the ideal team requires a massive standard deviation in height depending on positional geometry."
+claimNumber: 19
+mathConcepts: ["Normal Distributions", "Box Plots"]
+published: true
+---
+import BoxPlotVisualizer from '../../components/BoxPlotVisualizer.astro';
+
+If height is an advantage in winning aerial duels, shouldn't a team of 11 incredibly tall players mathematically dominate the sport? The answer is no, because football is a game of shifting spatial geometry.
+
+## The Biomechanics of Center of Gravity
+
+Height provides a massive **Expected Value (EV)** advantage during set-pieces (corners and free kicks) where the ball is airborne in the penalty box. Therefore, Center Backs and Strikers are statistically drafted from the extreme right-tail of the human height distribution. 
+
+However, in the midfield, the ball is played on the ground in extremely tight spaces. Here, biomechanics dictate that a lower center of gravity allows for faster rotational turning speeds and shorter stride-recovery times. Therefore, the optimal Playmaker (e.g., Lionel Messi at 170cm) is drafted from the left-tail or center of the distribution.
+
+## Positional Distributions
+
+If we look at title-winning teams, their squad doesn't cluster around one average height. Instead, they require a wide standard deviation, tightly grouped by positional roles. 
+
+Below is a Box and Whisker plot showing the typical height distributions (median, quartiles, and range) separated by tactical position.
+
+<BoxPlotVisualizer />

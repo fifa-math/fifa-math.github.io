@@ -1,0 +1,159 @@
+---
+// src/components/GaussianVisualizer.astro
+---
+<div id="gaussian-container" class="w-full h-[400px] border border-gray-200 rounded-lg bg-slate-800 relative">
+</div>
+
+<script>
+  import * as d3 from 'd3';
+
+  const container = document.getElementById('gaussian-container');
+  
+  if (container) {
+    let hasRendered = false;
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting && !hasRendered) {
+          hasRendered = true;
+          renderChart();
+        }
+      });
+    }, { threshold: 0.1 });
+
+    observer.observe(container);
+
+    function renderChart() {
+      const width = container.clientWidth;
+      const height = container.clientHeight;
+      const margin = {top: 40, right: 30, bottom: 50, left: 60};
+      
+      const innerWidth = width - margin.left - margin.right;
+      const innerHeight = height - margin.top - margin.bottom;
+
+      const svg = d3.select(container)
+        .append('svg')
+        .attr('width', '100%')
+        .attr('height', '100%')
+        .attr('viewBox', `0 0 ${width} ${height}`)
+        .append('g')
+        .attr('transform', `translate(${margin.left},${margin.top})`);
+
+      // Gaussian Distribution Math
+      const mean = 4.5; // Optimal total goals (e.g., 3-2 or 2-2)
+      const stdDev = 1.5;
+      
+      const data = d3.range(0, 11).map(goals => {
+        const exponent = Math.exp(-0.5 * Math.pow((goals - mean) / stdDev, 2));
+        const enjoyment = (1 / (stdDev * Math.sqrt(2 * Math.PI))) * exponent;
+        return { goals, enjoyment: enjoyment * 100 }; // Scaled for visualization
+      });
+
+      const x = d3.scaleLinear()
+        .domain([0, 10])
+        .range([0, innerWidth]);
+
+      const y = d3.scaleLinear()
+        .domain([0, d3.max(data, d => d.enjoyment) || 30])
+        .range([innerHeight, 0]);
+
+      // X Axis
+      svg.append("g")
+        .attr("transform", `translate(0,${innerHeight})`)
+        .call(d3.axisBottom(x).tickValues(d3.range(0, 11)))
+        .attr("color", "#94a3b8");
+
+      svg.append("text")
+        .attr("x", innerWidth / 2)
+        .attr("y", innerHeight + 40)
+        .attr("fill", "#94a3b8")
+        .attr("text-anchor", "middle")
+        .text("Total Goals in Match");
+
+      // Y Axis
+      svg.append("g")
+        .call(d3.axisLeft(y).tickFormat(() => "")) // Hide Y axis numbers
+        .attr("color", "#94a3b8");
+
+      svg.append("text")
+        .attr("transform", "rotate(-90)")
+        .attr("x", -innerHeight / 2)
+        .attr("y", -20)
+        .attr("fill", "#94a3b8")
+        .attr("text-anchor", "middle")
+        .text("Perceived Enjoyment");
+
+      const line = d3.line<any>()
+        .x(d => x(d.goals))
+        .y(d => y(d.enjoyment))
+        .curve(d3.curveMonotoneX);
+
+      // Area under curve
+      const area = d3.area<any>()
+        .x(d => x(d.goals))
+        .y0(innerHeight)
+        .y1(d => y(d.enjoyment))
+        .curve(d3.curveMonotoneX);
+
+      // Add gradient
+      const defs = svg.append("defs");
+      const gradient = defs.append("linearGradient")
+        .attr("id", "gauss-gradient")
+        .attr("x1", "0%").attr("y1", "0%")
+        .attr("x2", "0%").attr("y2", "100%");
+      gradient.append("stop").attr("offset", "0%").attr("stop-color", "#8b5cf6").attr("stop-opacity", 0.6);
+      gradient.append("stop").attr("offset", "100%").attr("stop-color", "#8b5cf6").attr("stop-opacity", 0.1);
+
+      // Draw Area
+      svg.append("path")
+        .datum(data)
+        .attr("fill", "url(#gauss-gradient)")
+        .attr("d", area)
+        .style("opacity", 0)
+        .transition()
+        .duration(1500)
+        .style("opacity", 1);
+
+      // Draw Path
+      const pathLine = svg.append("path")
+        .datum(data)
+        .attr("fill", "none")
+        .attr("stroke", "#8b5cf6")
+        .attr("stroke-width", 3)
+        .attr("d", line);
+        
+      const length = pathLine.node().getTotalLength();
+      pathLine.attr("stroke-dasharray", length + " " + length)
+          .attr("stroke-dashoffset", length)
+          .transition()
+          .duration(1500)
+          .ease(d3.easeCubicOut)
+          .attr("stroke-dashoffset", 0);
+          
+      // Highlight sweet spot
+      svg.append("circle")
+        .attr("cx", x(4.5))
+        .attr("cy", y(data[4].enjoyment + (data[5].enjoyment - data[4].enjoyment)/2))
+        .attr("r", 6)
+        .attr("fill", "#22c55e")
+        .style("opacity", 0)
+        .transition()
+        .delay(1000)
+        .duration(500)
+        .style("opacity", 1);
+        
+      svg.append("text")
+        .attr("x", x(4.5))
+        .attr("y", y(data[4].enjoyment) - 20)
+        .attr("fill", "#22c55e")
+        .attr("text-anchor", "middle")
+        .style("font-size", "14px")
+        .text("Optimal Tension (3-2, 2-2)")
+        .style("opacity", 0)
+        .transition()
+        .delay(1000)
+        .duration(500)
+        .style("opacity", 1);
+    }
+  }
+</script>

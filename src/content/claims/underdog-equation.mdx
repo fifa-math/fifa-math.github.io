@@ -1,0 +1,21 @@
+---
+title: "The Underdog Equation"
+description: "Why soccer has the optimal luck vs. skill ratio, making it statistically highly susceptible to variance."
+claimNumber: 2
+mathConcepts: ["Poisson Distribution", "Variance"]
+published: true
+---
+import PoissonVisualizer from '../../components/PoissonVisualizer.astro';
+
+Soccer is famously a low-scoring sport, which makes it statistically highly susceptible to variance. You can explain this using a Poisson distribution, which models the probability of a given number of events occurring in a fixed interval of time. 
+
+Soccer's scoring frequency can be modeled using the Poisson distribution. 
+The probability of a team scoring $x$ goals is defined as:
+
+$$ P(x) = \frac{\lambda^x e^{-\lambda}}{x!} $$
+
+Where $\lambda$ represents the team's expected goals (xG). Below is an interactive visualization of the variance.
+
+Because $\lambda$ (average goals per game) is typically between 1.0 and 1.5, the variance is massive. A dominant team with an xG of 2.5 can easily draw or lose against a lesser team with an xG of 0.5 simply due to statistical noise, making soccer mathematically the most favorable team sport for underdogs.
+
+<PoissonVisualizer lambda={1.2} />

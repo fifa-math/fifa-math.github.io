@@ -1,0 +1,24 @@
+---
+title: "The Anatomy of a Goal"
+description: "A statistical breakdown of how goals are actually scored at the highest level of the sport."
+claimNumber: 14
+mathConcepts: ["Categorical Distributions", "Relative Frequency"]
+published: true
+---
+import PieChartVisualizer from '../../components/PieChartVisualizer.astro';
+
+When you watch a highlight reel, it's easy to assume that long-range screamers, direct free kicks, and spectacular diving headers make up a significant portion of soccer's goals. However, the mathematical distribution of goal types tells a very different, much more practical story.
+
+## Relative Frequency of Goal Types
+
+By analyzing thousands of goals across the top five European leagues, statisticians can build a categorical distribution (or discrete probability distribution) mapping out exactly how goals are scored.
+
+- **Inside the Box (Open Play)**: Over 50% of all goals are scored from inside the 18-yard box using the feet during open play. This reinforces the "Geometry of the Goalkeeper" concept—getting closer to the goal exponentially increases the visible angle and scoring probability.
+- **Outside the Box**: Despite the highlight-reel nature of long-range shots, they only account for roughly 12% of goals, largely due to the mathematical constraints of human reaction time and the size of modern goalkeepers.
+- **Dead Balls & Penalties**: Penalties make up a surprisingly high ~9% of goals, while direct free kicks (curling over the wall) sit at a mere 4%.
+
+## Interactive Distribution
+
+Below is an interactive donut chart visualizing the typical statistical breakdown of goal types over a given season. Hover over the slices to see the exact relative frequencies.
+
+<PieChartVisualizer />

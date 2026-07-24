@@ -1,0 +1,26 @@
+---
+title: "The Biomechanics of Penalty Placement"
+description: "Why a right-footed striker's most natural instinct is to shoot to the goalkeeper's right."
+claimNumber: 24
+mathConcepts: ["Bivariate Distributions", "Heatmaps"]
+published: true
+---
+import HeatmapVisualizer from '../../components/HeatmapVisualizer.astro';
+
+When a player steps up to take a penalty kick, the entire goal frame represents a probabilistic matrix of success. However, human anatomy means that not all areas of the goal are equally accessible to the striker.
+
+## The Biomechanical Default
+
+For a right-footed player, the physical mechanics of striking a football make it significantly easier to generate extreme rotational power when swinging their leg *across* their body. 
+
+If a right-footed striker swings naturally, the ball's trajectory defaults to the left side of the goal frame (which is the **Goalkeeper's Right**). 
+
+Conversely, to place the ball in the opposite corner (the Goalkeeper's Left), the striker must artificially "open up" their hips and strike the ball with the inside of their foot. While this can be done with great accuracy, it mathematically reduces the maximum possible velocity ($v$) of the strike, giving the goalkeeper precious milliseconds to complete their dive.
+
+## Visualizing the Matrix
+
+If we plot thousands of penalty kicks taken by right-footed players, a distinct **Bivariate Distribution Heatmap** emerges. The "hot spots" are heavily biased toward the Goalkeeper's Right side.
+
+Below is a visualization of the goal frame as seen from the penalty spot. Notice the intense concentration of strikes crossing the body to the bottom left corner, compared to the colder spots where the hips must be opened.
+
+<HeatmapVisualizer />

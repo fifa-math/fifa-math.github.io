@@ -1,0 +1,145 @@
+---
+// src/components/RadarChartVisualizer.astro
+---
+<div id="radar-container" class="w-full h-[500px] border border-gray-200 rounded-lg bg-slate-800 relative flex justify-center items-center">
+</div>
+
+<script>
+  import * as d3 from 'd3';
+
+  const container = document.getElementById('radar-container');
+  
+  if (container) {
+    let hasRendered = false;
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting && !hasRendered) {
+          hasRendered = true;
+          renderChart();
+        }
+      });
+    }, { threshold: 0.1 });
+
+    observer.observe(container);
+
+    function renderChart() {
+      const width = container.clientWidth;
+      const height = container.clientHeight;
+      const margin = { top: 50, right: 50, bottom: 50, left: 50 };
+      const radius = Math.min(width - margin.left - margin.right, height - margin.top - margin.bottom) / 2;
+      
+      const svg = d3.select(container)
+        .append('svg')
+        .attr('width', width)
+        .attr('height', height)
+        .append('g')
+        .attr('transform', `translate(${width / 2},${height / 2})`);
+
+      // Features: Atmosphere, Sightlines, Tension vs Ticket Price, Travel, Weather
+      const features = ["Atmosphere", "Sightlines", "Match Tension", "Ticket Value", "Travel Ease", "Weather Comfort"];
+      const data = [
+        { name: "Optimal Matchday", axes: [0.9, 0.8, 1.0, 0.7, 0.6, 0.8] },
+        { name: "Unenjoyable Matchday", axes: [0.4, 0.5, 0.3, 0.2, 0.4, 0.2] }
+      ];
+
+      const angleSlice = Math.PI * 2 / features.length;
+      
+      // Radial scale
+      const rScale = d3.scaleLinear()
+        .range([0, radius])
+        .domain([0, 1]);
+
+      // Draw grid circles
+      const axisGrid = svg.append("g").attr("class", "axisWrapper");
+      
+      axisGrid.selectAll(".levels")
+        .data(d3.range(1, 6).reverse())
+        .enter()
+        .append("circle")
+        .attr("class", "gridCircle")
+        .attr("r", d => radius / 5 * d)
+        .style("fill", "#1e293b")
+        .style("stroke", "#475569")
+        .style("fill-opacity", 0.3);
+
+      // Draw axes
+      const axis = axisGrid.selectAll(".axis")
+        .data(features)
+        .enter()
+        .append("g")
+        .attr("class", "axis");
+
+      axis.append("line")
+        .attr("x1", 0)
+        .attr("y1", 0)
+        .attr("x2", (d, i) => rScale(1.05) * Math.cos(angleSlice * i - Math.PI / 2))
+        .attr("y2", (d, i) => rScale(1.05) * Math.sin(angleSlice * i - Math.PI / 2))
+        .attr("class", "line")
+        .style("stroke", "#475569")
+        .style("stroke-width", "2px");
+
+      axis.append("text")
+        .attr("class", "legend")
+        .style("font-size", "12px")
+        .attr("text-anchor", "middle")
+        .attr("fill", "#94a3b8")
+        .attr("x", (d, i) => rScale(1.15) * Math.cos(angleSlice * i - Math.PI / 2))
+        .attr("y", (d, i) => rScale(1.15) * Math.sin(angleSlice * i - Math.PI / 2))
+        .text(d => d);
+
+      // Draw radar blob
+      const radarLine = d3.lineRadial<number>()
+        .angle((d, i) => i * angleSlice)
+        .radius(d => rScale(d))
+        .curve(d3.curveLinearClosed);
+
+      const colors = ["#22c55e", "#ef4444"];
+
+      svg.selectAll(".radarWrapper")
+        .data(data)
+        .enter()
+        .append("g")
+        .attr("class", "radarWrapper")
+        .each(function(d, i) {
+          const wrapper = d3.select(this);
+          
+          wrapper.append("path")
+            .attr("class", "radarArea")
+            .attr("d", radarLine(d.axes))
+            .style("fill", colors[i])
+            .style("fill-opacity", 0.1)
+            .transition()
+            .duration(1000)
+            .style("fill-opacity", 0.3);
+            
+          wrapper.append("path")
+            .attr("class", "radarStroke")
+            .attr("d", radarLine(d.axes))
+            .style("stroke-width", 2 + "px")
+            .style("stroke", colors[i])
+            .style("fill", "none");
+            
+          wrapper.selectAll(".radarCircle")
+            .data(d.axes)
+            .enter()
+            .append("circle")
+            .attr("class", "radarCircle")
+            .attr("r", 4)
+            .attr("cx", (val, j) => rScale(val) * Math.cos(angleSlice * j - Math.PI / 2))
+            .attr("cy", (val, j) => rScale(val) * Math.sin(angleSlice * j - Math.PI / 2))
+            .style("fill", colors[i])
+            .style("fill-opacity", 0.8);
+        });
+        
+      // Legend
+      const legend = svg.append("g").attr("transform", `translate(${-width/2 + 20}, ${-height/2 + 20})`);
+      
+      legend.append("rect").attr("x", 0).attr("y", 0).attr("width", 10).attr("height", 10).attr("fill", "#22c55e");
+      legend.append("text").attr("x", 15).attr("y", 10).text("Optimal Matchday").attr("fill", "#cbd5e1").style("font-size", "12px");
+      
+      legend.append("rect").attr("x", 0).attr("y", 20).attr("width", 10).attr("height", 10).attr("fill", "#ef4444");
+      legend.append("text").attr("x", 15).attr("y", 30).text("Unenjoyable Matchday").attr("fill", "#cbd5e1").style("font-size", "12px");
+    }
+  }
+</script>

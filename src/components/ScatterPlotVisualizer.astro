@@ -1,0 +1,113 @@
+---
+// src/components/ScatterPlotVisualizer.astro
+---
+<div id="scatter-container" class="w-full h-[400px] border border-gray-200 rounded-lg bg-slate-800 relative">
+</div>
+
+<script>
+  import * as d3 from 'd3';
+
+  const container = document.getElementById('scatter-container');
+  
+  if (container) {
+    const width = container.clientWidth;
+    const height = container.clientHeight;
+    const margin = {top: 20, right: 30, bottom: 40, left: 50};
+    
+    const innerWidth = width - margin.left - margin.right;
+    const innerHeight = height - margin.top - margin.bottom;
+
+    const svg = d3.select(container)
+      .append('svg')
+      .attr('width', '100%')
+      .attr('height', '100%')
+      .attr('viewBox', `0 0 ${width} ${height}`)
+      .append('g')
+      .attr('transform', `translate(${margin.left},${margin.top})`);
+
+    // Generate random synthetic data to represent teams over a season
+    // Possession vs Win Rate. We want a weak correlation (r ~ 0.3)
+    const random = d3.randomNormal(0, 1);
+    const data = Array.from({length: 40}, () => {
+      const possession = 40 + Math.random() * 30; // 40% to 70%
+      // Weak correlation: win rate is somewhat random but slightly pulled by possession
+      const winRate = 20 + (possession - 55) * 0.5 + random() * 15;
+      return {
+        possession,
+        winRate: Math.max(0, Math.min(100, winRate))
+      };
+    });
+
+    const x = d3.scaleLinear()
+      .domain([35, 75])
+      .range([0, innerWidth]);
+
+    const y = d3.scaleLinear()
+      .domain([0, 100])
+      .range([innerHeight, 0]);
+
+    // X Axis
+    svg.append("g")
+      .attr("transform", `translate(0,${innerHeight})`)
+      .call(d3.axisBottom(x).tickFormat(d => d + "%"))
+      .attr("color", "#94a3b8");
+
+    svg.append("text")
+      .attr("x", innerWidth / 2)
+      .attr("y", innerHeight + 35)
+      .attr("fill", "#94a3b8")
+      .attr("text-anchor", "middle")
+      .text("Average Possession %");
+
+    // Y Axis
+    svg.append("g")
+      .call(d3.axisLeft(y).tickFormat(d => d + "%"))
+      .attr("color", "#94a3b8");
+
+    svg.append("text")
+      .attr("transform", "rotate(-90)")
+      .attr("x", -innerHeight / 2)
+      .attr("y", -35)
+      .attr("fill", "#94a3b8")
+      .attr("text-anchor", "middle")
+      .text("Win Rate %");
+
+    // Dots
+    svg.append("g")
+      .selectAll("circle")
+      .data(data)
+      .enter()
+      .append("circle")
+      .attr("cx", d => x(d.possession))
+      .attr("cy", d => y(d.winRate))
+      .attr("r", 5)
+      .attr("fill", "#3b82f6")
+      .attr("opacity", 0.7);
+
+    // Trend line (linear regression)
+    const xMean = d3.mean(data, d => d.possession) || 0;
+    const yMean = d3.mean(data, d => d.winRate) || 0;
+    let num = 0;
+    let den = 0;
+    for (const d of data) {
+      num += (d.possession - xMean) * (d.winRate - yMean);
+      den += (d.possession - xMean) ** 2;
+    }
+    const m = num / den;
+    const b = yMean - m * xMean;
+
+    const x1 = 35;
+    const y1 = m * x1 + b;
+    const x2 = 75;
+    const y2 = m * x2 + b;
+
+    svg.append("line")
+      .attr("x1", x(x1))
+      .attr("y1", y(y1))
+      .attr("x2", x(x2))
+      .attr("y2", y(y2))
+      .attr("stroke", "#ef4444")
+      .attr("stroke-width", 2)
+      .attr("stroke-dasharray", "5,5");
+  }
+</script>

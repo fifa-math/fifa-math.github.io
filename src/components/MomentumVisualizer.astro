@@ -1,0 +1,188 @@
+---
+// src/components/MomentumVisualizer.astro
+---
+<div id="momentum-container" class="w-full h-[300px] border border-gray-200 rounded-lg bg-slate-800 relative overflow-hidden">
+</div>
+
+<script>
+  import * as d3 from 'd3';
+
+  const container = document.getElementById('momentum-container');
+  
+  if (container) {
+    let hasRendered = false;
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting && !hasRendered) {
+          hasRendered = true;
+          renderChart();
+        }
+      });
+    }, { threshold: 0.1 });
+
+    observer.observe(container);
+
+    function renderChart() {
+      const width = container.clientWidth;
+      const height = container.clientHeight;
+      const margin = {top: 20, right: 30, bottom: 40, left: 50};
+      
+      const innerWidth = width - margin.left - margin.right;
+      const innerHeight = height - margin.top - margin.bottom;
+
+      const svg = d3.select(container)
+        .append('svg')
+        .attr('width', '100%')
+        .attr('height', '100%')
+        .attr('viewBox', `0 0 ${width} ${height}`)
+        .append('g')
+        .attr('transform', `translate(${margin.left},${margin.top})`);
+
+      // Generate random walk data for momentum (-100 to 100)
+      let currentVal = 0;
+      const data = d3.range(0, 91).map(minute => {
+        currentVal += (Math.random() - 0.5) * 40;
+        // Keep within bounds
+        currentVal = Math.max(-100, Math.min(100, currentVal));
+        return { minute, momentum: currentVal };
+      });
+      
+      // Inject a goal peak
+      data[45].momentum = 95;
+      data[44].momentum = 70;
+      data[46].momentum = 50;
+
+      const x = d3.scaleLinear()
+        .domain([0, 90])
+        .range([0, innerWidth]);
+
+      const y = d3.scaleLinear()
+        .domain([-100, 100])
+        .range([innerHeight, 0]);
+
+      // X Axis (Zero line)
+      svg.append("g")
+        .attr("transform", `translate(0,${innerHeight / 2})`)
+        .call(d3.axisBottom(x).tickValues(d3.range(0, 91, 15)))
+        .attr("color", "#94a3b8");
+
+      svg.append("text")
+        .attr("x", innerWidth / 2)
+        .attr("y", innerHeight + 30)
+        .attr("fill", "#94a3b8")
+        .attr("text-anchor", "middle")
+        .text("Match Minute");
+
+      // Y Axis
+      svg.append("g")
+        .call(d3.axisLeft(y).tickFormat(d => d > 0 ? `+${d}` : d))
+        .attr("color", "#94a3b8");
+
+      // Area generator
+      const area = d3.area<any>()
+        .x(d => x(d.minute))
+        .y0(y(0))
+        .y1(d => y(d.momentum))
+        .curve(d3.curveMonotoneX);
+
+      // Define gradients
+      const defs = svg.append("defs");
+      
+      const homeGradient = defs.append("linearGradient")
+        .attr("id", "home-gradient")
+        .attr("x1", "0%").attr("y1", "0%")
+        .attr("x2", "0%").attr("y2", "100%");
+      homeGradient.append("stop").attr("offset", "0%").attr("stop-color", "#3b82f6").attr("stop-opacity", 0.8);
+      homeGradient.append("stop").attr("offset", "100%").attr("stop-color", "#3b82f6").attr("stop-opacity", 0.1);
+
+      const awayGradient = defs.append("linearGradient")
+        .attr("id", "away-gradient")
+        .attr("x1", "0%").attr("y1", "100%")
+        .attr("x2", "0%").attr("y2", "0%");
+      awayGradient.append("stop").attr("offset", "0%").attr("stop-color", "#ef4444").attr("stop-opacity", 0.8);
+      awayGradient.append("stop").attr("offset", "100%").attr("stop-color", "#ef4444").attr("stop-opacity", 0.1);
+
+      svg.append("clipPath")
+        .attr("id", "clip-above")
+        .append("rect")
+        .attr("width", innerWidth)
+        .attr("height", innerHeight / 2);
+
+      svg.append("clipPath")
+        .attr("id", "clip-below")
+        .append("rect")
+        .attr("y", innerHeight / 2)
+        .attr("width", innerWidth)
+        .attr("height", innerHeight / 2);
+
+      const pathGroup = svg.append("g");
+
+      pathGroup.append("path")
+        .datum(data)
+        .attr("clip-path", "url(#clip-above)")
+        .attr("fill", "url(#home-gradient)")
+        .attr("d", area)
+        .style("opacity", 0)
+        .transition()
+        .duration(1500)
+        .style("opacity", 1);
+
+      pathGroup.append("path")
+        .datum(data)
+        .attr("clip-path", "url(#clip-below)")
+        .attr("fill", "url(#away-gradient)")
+        .attr("d", area)
+        .style("opacity", 0)
+        .transition()
+        .duration(1500)
+        .style("opacity", 1);
+
+      // Line
+      const line = d3.line<any>()
+        .x(d => x(d.minute))
+        .y(d => y(d.momentum))
+        .curve(d3.curveMonotoneX);
+
+      const pathLine = svg.append("path")
+        .datum(data)
+        .attr("fill", "none")
+        .attr("stroke", "#ffffff")
+        .attr("stroke-width", 2)
+        .attr("d", line);
+
+      const length = pathLine.node().getTotalLength();
+      pathLine.attr("stroke-dasharray", length + " " + length)
+          .attr("stroke-dashoffset", length)
+          .transition()
+          .duration(2000)
+          .ease(d3.easeLinear)
+          .attr("stroke-dashoffset", 0);
+          
+      // Goal marker
+      svg.append("circle")
+        .attr("cx", x(45))
+        .attr("cy", y(95))
+        .attr("r", 5)
+        .attr("fill", "#fbbf24")
+        .style("opacity", 0)
+        .transition()
+        .delay(1000)
+        .duration(500)
+        .style("opacity", 1);
+        
+      svg.append("text")
+        .attr("x", x(45))
+        .attr("y", y(95) - 10)
+        .attr("fill", "#fbbf24")
+        .attr("text-anchor", "middle")
+        .style("font-size", "12px")
+        .text("Goal")
+        .style("opacity", 0)
+        .transition()
+        .delay(1000)
+        .duration(500)
+        .style("opacity", 1);
+    }
+  }
+</script>

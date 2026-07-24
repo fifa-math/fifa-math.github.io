@@ -1,0 +1,26 @@
+---
+title: "The Optimal Turnover Ratio"
+description: "How soccer exists in a 'Goldilocks zone' of state transitions, creating sustained psychological tension unlike basketball or hockey."
+claimNumber: 1
+mathConcepts: ["Markov Chains", "Probability"]
+published: true
+---
+import MarkovVisualizer from '../../components/MarkovVisualizer.astro';
+
+Unlike basketball, where a turnover almost guarantees a high-probability scoring attempt, or hockey, where possession changes are frantic and constant, soccer exists in a "Goldilocks zone" of state transitions. 
+
+You can model this using **Markov chains** to show the probability of transitioning from defensive possession, to midfield build-up, to an attacking threat. The math proves that soccer's turnover frequency creates sustained psychological tension—possessions are long enough to build complex strategic patterns, but fragile enough that a single interception drastically shifts the expected goal (xG) value in seconds.
+
+## The State Transition Matrix
+
+If we represent the state of the game at any second $t$ as a vector $\mathbf{v}_t$ describing the location of the ball, we can multiply it by a transition matrix $P$ to find the probability distribution for the next state:
+
+$$ \mathbf{v}_{t+1} = \mathbf{v}_t P $$
+
+In soccer, the probability of staying in a non-scoring state (e.g., passing around the back) is incredibly high, which is why possessions can stretch for minutes. However, the probability of transitioning from an *Attack* state directly into a *Turnover* state is also massive, leading to the low-scoring nature of the sport.
+
+## Visualizing the Flow
+
+Below is a node-link diagram representing a simplified Markov chain of a football match. Note the high probability of transitioning back to a Turnover from Attack, compared to the low probability of transitioning to a Goal.
+
+<MarkovVisualizer />

@@ -1,0 +1,24 @@
+---
+title: "Possession Duration vs Goal Probability"
+description: "Why holding the ball for too long mathematically decreases your chances of scoring."
+claimNumber: 21
+mathConcepts: ["Probability Density Functions", "Exponential Decay"]
+published: true
+---
+import DensityVisualizer from '../../components/DensityVisualizer.astro';
+
+There is a common misconception that holding the ball for longer increases your chances of scoring. In reality, the probability of scoring is highest in the first few seconds of gaining possession and decays exponentially the longer you hold the ball.
+
+## The Mathematics of a Low Block
+
+When a team loses the ball, their defensive shape is immediately disorganized. This is the **Transition Window**. The probability of scoring during this window is incredibly high because the spatial geometry of the pitch is open. 
+
+However, as the seconds tick by ($t > 15$), the defending team has time to retreat and organize into a compact "Low Block." This drastically reduces the available space in the final third. 
+
+The probability density function (PDF) for goal scoring heavily skews to the left. Once a possession stretches beyond 30 seconds, the probability of scoring decays into an asymptote near zero, requiring extreme individual brilliance or a defensive error to break through.
+
+## Visualizing the Decay
+
+Below is a visualization showing how the probability of scoring spikes immediately after winning the ball, and then exponentially decays as the possession duration stretches on.
+
+<DensityVisualizer />

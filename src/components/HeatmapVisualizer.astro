@@ -1,0 +1,130 @@
+---
+// src/components/HeatmapVisualizer.astro
+---
+<div id="heatmap-container" class="w-full h-[400px] border border-gray-200 rounded-lg bg-slate-800 relative flex justify-center items-center overflow-hidden">
+</div>
+
+<script>
+  import * as d3 from 'd3';
+
+  const container = document.getElementById('heatmap-container');
+  
+  if (container) {
+    let hasRendered = false;
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting && !hasRendered) {
+          hasRendered = true;
+          renderChart();
+        }
+      });
+    }, { threshold: 0.1 });
+
+    observer.observe(container);
+
+    function renderChart() {
+      const width = container.clientWidth;
+      const height = container.clientHeight;
+      const margin = {top: 50, right: 50, bottom: 50, left: 50};
+      
+      const innerWidth = width - margin.left - margin.right;
+      const innerHeight = height - margin.top - margin.bottom;
+
+      const svg = d3.select(container)
+        .append('svg')
+        .attr('width', '100%')
+        .attr('height', '100%')
+        .attr('viewBox', `0 0 ${width} ${height}`)
+        .append('g')
+        .attr('transform', `translate(${margin.left},${margin.top})`);
+
+      // Draw the Goal Frame
+      const goalWidth = innerWidth;
+      const goalHeight = innerHeight - 20;
+
+      // Net (subtle background grid)
+      const netGroup = svg.append("g").attr("class", "net");
+      for(let i=0; i<goalWidth; i+=20) {
+        netGroup.append("line").attr("x1", i).attr("y1", 0).attr("x2", i).attr("y2", goalHeight).attr("stroke", "#334155").attr("stroke-width", 1);
+      }
+      for(let i=0; i<goalHeight; i+=20) {
+        netGroup.append("line").attr("x1", 0).attr("y1", i).attr("x2", goalWidth).attr("y2", i).attr("stroke", "#334155").attr("stroke-width", 1);
+      }
+
+      // Goal posts & crossbar
+      svg.append("rect")
+        .attr("x", -10)
+        .attr("y", -10)
+        .attr("width", goalWidth + 20)
+        .attr("height", goalHeight + 10)
+        .attr("fill", "none")
+        .attr("stroke", "#f1f5f9") // white posts
+        .attr("stroke-width", 10);
+        
+      // Pitch line
+      svg.append("line")
+        .attr("x1", -30)
+        .attr("y1", goalHeight)
+        .attr("x2", goalWidth + 30)
+        .attr("y2", goalHeight)
+        .attr("stroke", "#22c55e")
+        .attr("stroke-width", 4);
+
+      // Generating Synthetic Heatmap Data for a Right-Footed Shooter
+      // Bias towards the Goalkeeper's Right (Shooter's Left)
+      
+      const hotSpots = [
+        // Bottom Left (Shooter's Left / GK Right) - VERY HOT (Crossing the body)
+        { cx: goalWidth * 0.15, cy: goalHeight * 0.85, radius: 60, intensity: 0.9 },
+        // Top Left (Shooter's Left / GK Right) - HOT (Crossing the body with elevation)
+        { cx: goalWidth * 0.15, cy: goalHeight * 0.20, radius: 50, intensity: 0.7 },
+        // Bottom Right (Shooter's Right / GK Left) - MEDIUM (Opening the hips)
+        { cx: goalWidth * 0.85, cy: goalHeight * 0.85, radius: 45, intensity: 0.5 },
+        // Top Right (Shooter's Right / GK Left) - COLDER (Hardest shot to master)
+        { cx: goalWidth * 0.85, cy: goalHeight * 0.20, radius: 35, intensity: 0.3 },
+        // Center - VERY COLD (Panenka / Down the middle)
+        { cx: goalWidth * 0.50, cy: goalHeight * 0.70, radius: 40, intensity: 0.2 },
+      ];
+
+      const defs = svg.append("defs");
+      const filter = defs.append("filter").attr("id", "blur");
+      filter.append("feGaussianBlur").attr("in", "SourceGraphic").attr("stdDeviation", 15);
+
+      const colorScale = d3.scaleSequential(d3.interpolateYlOrRd).domain([0, 1]);
+
+      const heatmapGroup = svg.append("g").attr("filter", "url(#blur)");
+
+      heatmapGroup.selectAll("circle")
+        .data(hotSpots)
+        .enter()
+        .append("circle")
+        .attr("cx", d => d.cx)
+        .attr("cy", d => d.cy)
+        .attr("r", 0) // Start at 0 for animation
+        .attr("fill", d => colorScale(d.intensity))
+        .attr("opacity", 0.8)
+        .transition()
+        .duration(1500)
+        .ease(d3.easeElasticOut)
+        .attr("r", d => d.radius);
+        
+      // Labels
+      svg.append("text")
+        .attr("x", goalWidth * 0.15)
+        .attr("y", -25)
+        .attr("fill", "#94a3b8")
+        .attr("text-anchor", "middle")
+        .style("font-size", "14px")
+        .text("GK's Right (Shooter's Left)");
+        
+      svg.append("text")
+        .attr("x", goalWidth * 0.85)
+        .attr("y", -25)
+        .attr("fill", "#94a3b8")
+        .attr("text-anchor", "middle")
+        .style("font-size", "14px")
+        .text("GK's Left (Shooter's Right)");
+    }
+  }
+</script>

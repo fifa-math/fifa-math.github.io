@@ -1,0 +1,27 @@
+---
+title: "High & Low Correlations in Soccer"
+description: "Identifying what actually drives success on the pitch using R-squared values and linear regression."
+claimNumber: 9
+mathConcepts: ["R-squared", "Linear Regression"]
+published: true
+---
+
+If possession doesn't guarantee a win, what does? We can use the coefficient of determination, $R^2$, to measure how much of the variance in a team's points per season can be explained by a single metric.
+
+$$ R^2 = 1 - \frac{\sum (y_i - \hat{y}_i)^2}{\sum (y_i - \bar{y})^2} $$
+
+Here are some of the most surprising statistical correlations found when analyzing decades of soccer data.
+
+## The High Correlations
+
+These metrics are mathematically proven to drive success:
+
+1. **Wage Bill vs. League Position ($R^2 \approx 0.70$)**: The harsh reality of modern football is that money dictates outcomes. The correlation between a club's total wage bill and their final league position is incredibly high.
+2. **Expected Goals (xG) Difference vs. Points ($R^2 \approx 0.85$)**: Over a 38-game season, a team's xG Difference (xG created minus xG conceded) is the single most accurate predictor of their total points, filtering out the noise of lucky finishes or spectacular goalkeeping.
+
+## The Surprisingly Low Correlations
+
+These metrics often dominate punditry but have little mathematical bearing on the final score:
+
+1. **Distance Covered vs. Points ($R^2 \approx 0.05$)**: Running more does not mean winning more. In fact, teams that dominate possession often run *less* because they make the opposing team chase the ball. 
+2. **Corners Won vs. Goals Scored ($R^2 \approx 0.10$)**: Despite the roar of the crowd when a corner is won, the statistical conversion rate of a standard corner kick into a goal is less than 3%. Accumulating corners is a terrible predictor of attacking success.
