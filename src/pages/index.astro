@@ -18,15 +18,22 @@ claims.sort((a, b) => a.data.claimNumber - b.data.claimNumber);
     </p>
   </div>
 
-  <TableOfContents claims={claims} />
+  <div class="flex flex-col xl:flex-row-reverse gap-8 relative items-start">
+    
+    <!-- Sidebar TOC -->
+    <aside class="w-full xl:w-1/4 xl:sticky xl:top-8 z-40">
+      <TableOfContents claims={claims} />
+    </aside>
 
-  <!-- Live Hub Dashboard -->
-  <div class="mb-16 grid grid-cols-1 lg:grid-cols-2 gap-6">
-    <LivePolls />
-    <LiveTransfers />
-  </div>
+    <!-- Main Content -->
+    <div class="w-full xl:w-3/4">
+      <!-- Live Hub Dashboard -->
+      <div class="mb-16 grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <LivePolls />
+        <LiveTransfers />
+      </div>
 
-  <div class="space-y-16">
+      <div class="space-y-16">
     {claims.map(async (claim) => {
       const { Content } = await render(claim);
       return (
@@ -40,11 +47,13 @@ claims.sort((a, b) => a.data.claimNumber - b.data.claimNumber);
               ))}
             </div>
           </header>
-          <div class="prose prose-invert prose-blue max-w-none prose-img:rounded-xl">
+          <div class="px-8 pb-8 prose prose-invert prose-blue max-w-none prose-img:rounded-xl">
             <Content />
           </div>
         </article>
       );
     })}
   </div>
+  </div>
+</div>
 </BaseLayout>

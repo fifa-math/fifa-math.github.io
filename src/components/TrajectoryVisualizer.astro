@@ -77,9 +77,9 @@
         .attr("fill", "#f59e0b");
 
       // Corner Flags (Bottom corners of the SVG simulate the far side of the pitch)
-      // Actually let's just make the corner from the bottom right to the goal at the top
-      const cornerX = innerWidth - 50;
-      const cornerY = innerHeight - 50;
+      // Since the goal is at y=0 (top), the corner flag is at the top right of this half-pitch
+      const cornerX = innerWidth - 10;
+      const cornerY = 0;
       
       svg.append("circle")
         .attr("cx", cornerX)
@@ -91,7 +91,7 @@
         .attr("x", cornerX - 10)
         .attr("y", cornerY + 15)
         .attr("fill", "#fff")
-        .attr("text-anchor", "middle")
+        .attr("text-anchor", "end")
         .style("font-size", "12px")
         .text("Corner Flag");
 
@@ -101,7 +101,7 @@
       // Out-Swinger Trajectory (Bends AWAY from goal, landing around penalty spot)
       const outSwingerData = [
         [cornerX, cornerY],
-        [innerWidth / 2 + 100, innerHeight / 2],
+        [innerWidth / 2 + 100, 100],
         [innerWidth / 2 - 20, 120] // Lands near penalty spot
       ];
 
@@ -124,7 +124,7 @@
       // In-Swinger Trajectory (Bends TOWARDS goal, landing in 6 yard box)
       const inSwingerData = [
         [cornerX, cornerY],
-        [innerWidth / 2, innerHeight / 2 + 20],
+        [innerWidth / 2 + 50, 20],
         [innerWidth / 2 + 20, 40] // Lands dangerously close to GK
       ];
 
