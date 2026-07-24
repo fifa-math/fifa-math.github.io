@@ -1,0 +1,26 @@
+---
+title: "The First-Mover Advantage in Shootouts"
+description: "Why the coin toss is the most mathematically significant moment of a penalty shootout."
+claimNumber: 27
+mathConcepts: ["Game Theory", "Probability Trees"]
+published: true
+---
+import GameTheoryVisualizer from '../../components/GameTheoryVisualizer.astro';
+
+When a knockout match goes to a penalty shootout, it is traditionally conducted in an **ABAB format** (Team A shoots, then Team B shoots). This creates a massive mathematical flaw in competitive fairness. 
+
+## The Psychological Matrix of Game Theory
+
+In an ABAB shootout, the team that shoots first (Team A) is mathematically shielded by a psychological safety net. When Player A steps up, they are almost always shooting to *take the lead*. If they miss, the score simply remains tied. 
+
+However, because Team A has a 73% chance of scoring their penalty, Team B is almost always stepping up to shoot while *trailing*. This induces a psychological matrix state known as "Elimination Pressure." 
+
+The math is brutal. When a player is shooting to tie the shootout (or keep their team alive), their historical conversion rate plummets from 73% down to roughly **62%**. 
+
+Because this pressure stacks and cascades down the order, Team A (the team that shoots first) wins approximately **60%** of all penalty shootouts.
+
+## The Probability Tree
+
+Below is a Network Diagram (Probability Tree) mapping the cascading failure rate of Team B compared to Team A. 
+
+<GameTheoryVisualizer />

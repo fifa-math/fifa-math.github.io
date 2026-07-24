@@ -1,0 +1,28 @@
+---
+title: "Expected Goals (xG) and Regression to the Mean"
+description: "Why hot streaks and goal droughts are just statistical variance bending back to the mathematical baseline."
+claimNumber: 26
+mathConcepts: ["Regression to the Mean", "Statistical Variance"]
+published: true
+---
+import RegressionVisualizer from '../../components/RegressionVisualizer.astro';
+
+At the start of every season, a relatively unknown striker will score 6 goals in their first 4 matches. Pundits will declare them a breakout superstar. By December, that same striker will go 10 matches without scoring a single goal. Pundits will declare them a "one-season wonder" who lost their confidence.
+
+The math tells a much simpler, unemotional story: **Regression to the Mean**.
+
+## The Law of Large Numbers
+
+Expected Goals (xG) is a metric that assigns a mathematical probability to every shot taken, based on historical data. If a striker has accumulated 10.0 xG over a season, they "should" have scored 10 goals.
+
+In a small sample size (like 4 matches), statistical variance is incredibly high. A striker might score 6 goals from only 1.5 xG. This is an unsustainable overperformance. As the sample size grows toward the full 38-game season (The Law of Large Numbers), the extreme variance disappears. 
+
+To correct the early overperformance, the universe mathematically forces a "goal drought"—where the striker might score 0 goals from their next 3.0 xG. By the end of the season, their actual goals scored will almost perfectly mirror their underlying xG baseline.
+
+## Visualizing Variance (The Violin Plot)
+
+Below, the dotted orange line represents a striker's true xG baseline (0.5 xG per game). The blue shaded area represents the statistical variance (which acts like a horizontal Violin Plot, wide at the start due to small sample sizes, and narrowing over time). 
+
+Watch how the striker's actual goals (the white line) wildly deviate during a "hot streak," only to suffer a "goal drought" that snaps their output violently back to the mathematical mean.
+
+<RegressionVisualizer />

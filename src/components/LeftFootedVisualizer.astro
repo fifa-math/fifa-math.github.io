@@ -1,0 +1,136 @@
+---
+// src/components/LeftFootedVisualizer.astro
+---
+<div id="leftfoot-container" class="w-full h-[400px] border border-gray-200 rounded-lg bg-slate-800 relative flex justify-center items-center overflow-hidden">
+</div>
+
+<script>
+  import * as d3 from 'd3';
+
+  const container = document.getElementById('leftfoot-container');
+  
+  if (container) {
+    let hasRendered = false;
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting && !hasRendered) {
+          hasRendered = true;
+          renderChart();
+        }
+      });
+    }, { threshold: 0.1 });
+
+    observer.observe(container);
+
+    function renderChart() {
+      const width = container.clientWidth;
+      const height = container.clientHeight;
+      const margin = {top: 20, right: 20, bottom: 20, left: 20};
+      
+      const innerWidth = width - margin.left - margin.right;
+      const innerHeight = height - margin.top - margin.bottom;
+
+      const svg = d3.select(container)
+        .append('svg')
+        .attr('width', '100%')
+        .attr('height', '100%')
+        .attr('viewBox', `0 0 ${width} ${height}`)
+        .append('g')
+        .attr('transform', `translate(${margin.left},${margin.top})`);
+
+      // Draw the Pitch (Left Flank)
+      svg.append("rect")
+        .attr("x", 0)
+        .attr("y", 0)
+        .attr("width", innerWidth)
+        .attr("height", innerHeight)
+        .attr("fill", "#0f172a");
+
+      // Touchline
+      svg.append("line")
+        .attr("x1", 50)
+        .attr("y1", 0)
+        .attr("x2", 50)
+        .attr("y2", innerHeight)
+        .attr("stroke", "#ffffff")
+        .attr("stroke-width", 4);
+        
+      svg.append("text").attr("x", 20).attr("y", innerHeight/2).attr("transform", `rotate(-90 20,${innerHeight/2})`).attr("fill", "#fff").text("Left Touchline").style("font-size", "12px");
+
+      // Center Back Position (Origin)
+      const cx = 150;
+      const cy = innerHeight - 50;
+      
+      svg.append("circle")
+        .attr("cx", cx)
+        .attr("cy", cy)
+        .attr("r", 10)
+        .attr("fill", "#3b82f6");
+
+      svg.append("text")
+        .attr("x", cx + 20)
+        .attr("y", cy + 5)
+        .attr("fill", "#3b82f6")
+        .text("Center Back");
+
+      // Define the wedges (Passing Cones)
+      const rightFootWedge = d3.arc()
+        .innerRadius(0)
+        .outerRadius(innerHeight - 100)
+        .startAngle(-Math.PI / 8) // Angles relative to 12 o'clock
+        .endAngle(Math.PI / 3);
+
+      const leftFootWedge = d3.arc()
+        .innerRadius(0)
+        .outerRadius(innerHeight - 100)
+        .startAngle(-Math.PI / 2.5) // Can pass all the way down the line
+        .endAngle(Math.PI / 3);
+
+      const wedgeGroup = svg.append("g").attr("transform", `translate(${cx},${cy})`);
+
+      // Draw Right Footed Cone (Red/Restricted)
+      wedgeGroup.append("path")
+        .attr("d", rightFootWedge as any)
+        .attr("fill", "#ef4444")
+        .style("opacity", 0)
+        .transition()
+        .delay(500)
+        .duration(1000)
+        .style("opacity", 0.5);
+
+      // Draw Left Footed Cone extension (Green/Optimal)
+      const optimalWedge = d3.arc()
+        .innerRadius(0)
+        .outerRadius(innerHeight - 100)
+        .startAngle(-Math.PI / 2.5) 
+        .endAngle(-Math.PI / 8);
+
+      wedgeGroup.append("path")
+        .attr("d", optimalWedge as any)
+        .attr("fill", "#22c55e")
+        .style("opacity", 0)
+        .transition()
+        .delay(1500)
+        .duration(1000)
+        .style("opacity", 0.6);
+
+      // Labels
+      wedgeGroup.append("text")
+        .attr("x", 40)
+        .attr("y", -100)
+        .attr("fill", "#ef4444")
+        .text("Right-Footed Angle")
+        .style("opacity", 0)
+        .transition().delay(1000).style("opacity", 1);
+        
+      wedgeGroup.append("text")
+        .attr("x", -150)
+        .attr("y", -80)
+        .attr("fill", "#22c55e")
+        .text("Left-Foot Bonus Area")
+        .style("opacity", 0)
+        .transition().delay(2000).style("opacity", 1);
+    }
+  }
+</script>

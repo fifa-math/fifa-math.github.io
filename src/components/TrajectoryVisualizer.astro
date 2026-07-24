@@ -1,0 +1,169 @@
+---
+// src/components/TrajectoryVisualizer.astro
+---
+<div id="trajectory-container" class="w-full h-[400px] border border-gray-200 rounded-lg bg-slate-800 relative flex justify-center items-center overflow-hidden">
+</div>
+
+<script>
+  import * as d3 from 'd3';
+
+  const container = document.getElementById('trajectory-container');
+  
+  if (container) {
+    let hasRendered = false;
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting && !hasRendered) {
+          hasRendered = true;
+          renderChart();
+        }
+      });
+    }, { threshold: 0.1 });
+
+    observer.observe(container);
+
+    function renderChart() {
+      const width = container.clientWidth;
+      const height = container.clientHeight;
+      const margin = {top: 20, right: 20, bottom: 20, left: 20};
+      
+      const innerWidth = width - margin.left - margin.right;
+      const innerHeight = height - margin.top - margin.bottom;
+
+      const svg = d3.select(container)
+        .append('svg')
+        .attr('width', '100%')
+        .attr('height', '100%')
+        .attr('viewBox', `0 0 ${width} ${height}`)
+        .append('g')
+        .attr('transform', `translate(${margin.left},${margin.top})`);
+
+      // Draw Penalty Box
+      svg.append("rect")
+        .attr("x", innerWidth / 2 - 150)
+        .attr("y", 0)
+        .attr("width", 300)
+        .attr("height", 150)
+        .attr("fill", "none")
+        .attr("stroke", "#475569")
+        .attr("stroke-width", 2);
+
+      // Draw 6-yard box
+      svg.append("rect")
+        .attr("x", innerWidth / 2 - 60)
+        .attr("y", 0)
+        .attr("width", 120)
+        .attr("height", 60)
+        .attr("fill", "none")
+        .attr("stroke", "#475569")
+        .attr("stroke-width", 2);
+
+      // Goal Frame
+      svg.append("rect")
+        .attr("x", innerWidth / 2 - 30)
+        .attr("y", 0)
+        .attr("width", 60)
+        .attr("height", 5)
+        .attr("fill", "#ffffff");
+
+      // Goalkeeper
+      const gkX = innerWidth / 2;
+      const gkY = 10;
+      svg.append("circle")
+        .attr("cx", gkX)
+        .attr("cy", gkY)
+        .attr("r", 5)
+        .attr("fill", "#f59e0b");
+
+      // Corner Flags (Bottom corners of the SVG simulate the far side of the pitch)
+      // Actually let's just make the corner from the bottom right to the goal at the top
+      const cornerX = innerWidth - 50;
+      const cornerY = innerHeight - 50;
+      
+      svg.append("circle")
+        .attr("cx", cornerX)
+        .attr("cy", cornerY)
+        .attr("r", 4)
+        .attr("fill", "#ffffff");
+
+      svg.append("text")
+        .attr("x", cornerX - 10)
+        .attr("y", cornerY + 15)
+        .attr("fill", "#fff")
+        .attr("text-anchor", "middle")
+        .style("font-size", "12px")
+        .text("Corner Flag");
+
+      const lineGen = d3.line<any>()
+        .curve(d3.curveBundle.beta(1));
+
+      // Out-Swinger Trajectory (Bends AWAY from goal, landing around penalty spot)
+      const outSwingerData = [
+        [cornerX, cornerY],
+        [innerWidth / 2 + 100, innerHeight / 2],
+        [innerWidth / 2 - 20, 120] // Lands near penalty spot
+      ];
+
+      const outPath = svg.append("path")
+        .datum(outSwingerData)
+        .attr("fill", "none")
+        .attr("stroke", "#ef4444")
+        .attr("stroke-width", 3)
+        .attr("stroke-dasharray", "5,5")
+        .attr("d", lineGen);
+
+      const outLength = outPath.node()?.getTotalLength() || 1000;
+      outPath.attr("stroke-dasharray", outLength + " " + outLength)
+          .attr("stroke-dashoffset", outLength)
+          .transition()
+          .duration(2000)
+          .ease(d3.easeQuadOut)
+          .attr("stroke-dashoffset", 0);
+
+      // In-Swinger Trajectory (Bends TOWARDS goal, landing in 6 yard box)
+      const inSwingerData = [
+        [cornerX, cornerY],
+        [innerWidth / 2, innerHeight / 2 + 20],
+        [innerWidth / 2 + 20, 40] // Lands dangerously close to GK
+      ];
+
+      const inPath = svg.append("path")
+        .datum(inSwingerData)
+        .attr("fill", "none")
+        .attr("stroke", "#22c55e")
+        .attr("stroke-width", 4)
+        .attr("d", lineGen);
+
+      const inLength = inPath.node()?.getTotalLength() || 1000;
+      inPath.attr("stroke-dasharray", inLength + " " + inLength)
+          .attr("stroke-dashoffset", inLength)
+          .transition()
+          .delay(500)
+          .duration(2000)
+          .ease(d3.easeQuadOut)
+          .attr("stroke-dashoffset", 0);
+
+      // Labels
+      svg.append("text")
+        .attr("x", innerWidth / 2 - 30)
+        .attr("y", 135)
+        .attr("fill", "#ef4444")
+        .attr("text-anchor", "end")
+        .style("font-size", "14px")
+        .text("Out-Swinger (Less xG)")
+        .style("opacity", 0)
+        .transition().delay(2000).style("opacity", 1);
+        
+      svg.append("text")
+        .attr("x", innerWidth / 2 + 30)
+        .attr("y", 45)
+        .attr("fill", "#22c55e")
+        .attr("text-anchor", "start")
+        .style("font-size", "14px")
+        .text("In-Swinger (Danger Zone)")
+        .style("opacity", 0)
+        .transition().delay(2500).style("opacity", 1);
+    }
+  }
+</script>

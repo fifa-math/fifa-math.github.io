@@ -1,0 +1,171 @@
+---
+// src/components/DecayCurveVisualizer.astro
+---
+<div id="decay-container" class="w-full h-[400px] border border-gray-200 rounded-lg bg-slate-800 relative">
+</div>
+
+<script>
+  import * as d3 from 'd3';
+
+  const container = document.getElementById('decay-container');
+  
+  if (container) {
+    let hasRendered = false;
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting && !hasRendered) {
+          hasRendered = true;
+          renderChart();
+        }
+      });
+    }, { threshold: 0.1 });
+
+    observer.observe(container);
+
+    function renderChart() {
+      const width = container.clientWidth;
+      const height = container.clientHeight;
+      const margin = {top: 40, right: 40, bottom: 50, left: 60};
+      
+      const innerWidth = width - margin.left - margin.right;
+      const innerHeight = height - margin.top - margin.bottom;
+
+      const svg = d3.select(container)
+        .append('svg')
+        .attr('width', '100%')
+        .attr('height', '100%')
+        .attr('viewBox', `0 0 ${width} ${height}`)
+        .append('g')
+        .attr('transform', `translate(${margin.left},${margin.top})`);
+
+      const x = d3.scaleLinear().domain([0, 90]).range([0, innerWidth]);
+      const y = d3.scaleLinear().domain([0, 100]).range([innerHeight, 0]);
+
+      // X Axis (Minutes)
+      svg.append("g")
+        .attr("transform", `translate(0,${innerHeight})`)
+        .call(d3.axisBottom(x).tickValues([0, 15, 30, 45, 60, 68, 75, 90]))
+        .attr("color", "#94a3b8");
+
+      svg.append("text")
+        .attr("x", innerWidth / 2)
+        .attr("y", innerHeight + 40)
+        .attr("fill", "#94a3b8")
+        .attr("text-anchor", "middle")
+        .text("Match Minute");
+
+      // Y Axis (Physical Output / Intensity)
+      svg.append("g")
+        .call(d3.axisLeft(y).tickFormat(d => d + "%"))
+        .attr("color", "#94a3b8");
+
+      svg.append("text")
+        .attr("transform", "rotate(-90)")
+        .attr("x", -innerHeight / 2)
+        .attr("y", -45)
+        .attr("fill", "#94a3b8")
+        .attr("text-anchor", "middle")
+        .text("Physical Output (Intensity)");
+
+      // Starter Data (Exponential Decay)
+      const starterData = d3.range(0, 91).map(min => {
+        // High drop around 60-70 mins
+        let output = 100 - (min * 0.4) - Math.pow(min/15, 1.8);
+        return { min, output: Math.max(20, output) };
+      });
+
+      const lineGen = d3.line<any>()
+        .x(d => x(d.min))
+        .y(d => y(d.output))
+        .curve(d3.curveMonotoneX);
+
+      // Starter Path
+      const starterPath = svg.append("path")
+        .datum(starterData)
+        .attr("fill", "none")
+        .attr("stroke", "#ef4444")
+        .attr("stroke-width", 3)
+        .attr("d", lineGen);
+        
+      const sLength = starterPath.node()?.getTotalLength() || 1000;
+      starterPath.attr("stroke-dasharray", sLength + " " + sLength)
+          .attr("stroke-dashoffset", sLength)
+          .transition()
+          .duration(2000)
+          .ease(d3.easeLinear)
+          .attr("stroke-dashoffset", 0);
+
+      // Sub Data (Step Function at 68 mins)
+      const subData = d3.range(68, 91).map(min => {
+        // Sub comes on fresh, but quickly adjusts to game speed
+        let output = 95 - ((min - 68) * 0.8);
+        return { min, output };
+      });
+
+      // Sub Path
+      const subPath = svg.append("path")
+        .datum(subData)
+        .attr("fill", "none")
+        .attr("stroke", "#22c55e")
+        .attr("stroke-width", 3)
+        .attr("d", lineGen);
+        
+      const subLength = subPath.node()?.getTotalLength() || 1000;
+      subPath.attr("stroke-dasharray", subLength + " " + subLength)
+          .attr("stroke-dashoffset", subLength)
+          .transition()
+          .delay(1500) // wait for starter to hit min 68 approx
+          .duration(1000)
+          .ease(d3.easeLinear)
+          .attr("stroke-dashoffset", 0);
+
+      // Highlight the intersection point
+      svg.append("circle")
+        .attr("cx", x(68))
+        .attr("cy", y(starterData[68].output))
+        .attr("r", 8)
+        .attr("fill", "#f59e0b")
+        .style("opacity", 0)
+        .transition()
+        .delay(2000)
+        .style("opacity", 1);
+        
+      // Vertical line for substitution point
+      svg.append("line")
+        .attr("x1", x(68))
+        .attr("y1", innerHeight)
+        .attr("x2", x(68))
+        .attr("y2", y(95))
+        .attr("stroke", "#f59e0b")
+        .attr("stroke-dasharray", "5,5")
+        .style("opacity", 0)
+        .transition()
+        .delay(2000)
+        .style("opacity", 1);
+
+      svg.append("text")
+        .attr("x", x(68) - 10)
+        .attr("y", y(95))
+        .attr("fill", "#22c55e")
+        .attr("text-anchor", "end")
+        .style("font-size", "14px")
+        .text("Sub Enters")
+        .style("opacity", 0)
+        .transition()
+        .delay(2000)
+        .style("opacity", 1);
+        
+      svg.append("text")
+        .attr("x", x(85))
+        .attr("y", y(starterData[85].output) - 15)
+        .attr("fill", "#ef4444")
+        .style("font-size", "14px")
+        .text("Starter Fatigue")
+        .style("opacity", 0)
+        .transition()
+        .delay(2500)
+        .style("opacity", 1);
+    }
+  }
+</script>

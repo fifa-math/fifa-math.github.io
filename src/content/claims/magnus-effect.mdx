@@ -1,0 +1,26 @@
+---
+title: "The Magnus Effect on Corner Kicks"
+description: "Why In-Swinging corners generate significantly higher Expected Goals (xG) than Out-Swingers."
+claimNumber: 30
+mathConcepts: ["Fluid Dynamics", "Trajectory Curves"]
+published: true
+---
+import TrajectoryVisualizer from '../../components/TrajectoryVisualizer.astro';
+
+When a team wins a corner kick, the designated taker usually has two options: deliver an **In-Swinger** (curling toward the goalkeeper) or an **Out-Swinger** (curling away from the goalkeeper). 
+
+Mathematical models based on fluid dynamics and Expected Goals (xG) prove that one option is vastly superior to the other.
+
+## The Magnus Effect
+
+When a player strikes the side of the ball, it creates rapid spin. As the ball travels through the air, this spin drags air faster on one side than the other, creating a pressure differential that physically curves the ball mid-air. This is called the **Magnus Effect**.
+
+An **Out-Swinging** corner relies on the Magnus Effect to bend the ball away from the goal. Because the ball's trajectory is literally fleeing the target, the attacker must generate their own immense power to redirect the ball back toward the net. Statistically, out-swingers land further away (around the penalty spot) and have a lower xG conversion rate.
+
+An **In-Swinging** corner relies on the Magnus Effect to bend the ball directly into the "Danger Zone" (the 6-yard box). Because the ball is already traveling toward the net with high velocity, the attacker simply needs to glance the ball to score. The physics of the delivery does 80% of the work.
+
+## Visualizing the Physics
+
+Below is a Trajectory Diagram simulating the flight paths of an Out-Swinger vs an In-Swinger from the right corner flag. Notice how the In-Swinger's terminal curve naturally targets the 6-yard box, creating a nightmare for the goalkeeper.
+
+<TrajectoryVisualizer />
