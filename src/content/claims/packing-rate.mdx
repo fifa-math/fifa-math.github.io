@@ -1,0 +1,20 @@
+---
+title: "The Packing Rate"
+description: "Why the most valuable passes in soccer are the ones that take opponents out of the game."
+claimNumber: 30
+mathConcepts: ["Vectors", "Line Breaking"]
+published: true
+---
+import PackingVisualizer from '../../components/PackingVisualizer.astro';
+
+A pass from one center-back to another is safe, but it rarely leads to a goal. To objectively measure which players are actually driving the offense forward, German analysts invented the concept of **Packing**.
+
+## Taking Players Out of the Game
+
+Packing evaluates a pass by counting the number of opposing players who are bypassed (or "packed") by the trajectory of the ball. If a midfielder threads a through-ball past the opponent's midfield line and into the feet of their striker, all the opponents caught behind the ball are mathematically taken out of the defensive equation.
+
+<div class="my-8">
+  <PackingVisualizer />
+</div>
+
+In modern recruitment, data scientists prize midfielders and center-backs with high Packing Rates. A player who successfully packs 60 opponents per match is doing significantly more structural damage to the opposing defense than a player who makes 100 safe lateral passes that pack 0 opponents.

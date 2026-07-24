@@ -1,0 +1,203 @@
+---
+// src/components/PackingVisualizer.astro
+---
+<div class="packing-container" role="figure" aria-label="Packing Rate Visualization" class="w-full h-[500px] border border-gray-200 rounded-lg bg-green-800 relative flex flex-col items-center overflow-hidden">
+  
+  <div class="absolute top-4 left-4 z-10 bg-slate-900/80 p-3 rounded-lg border border-slate-700 pointer-events-none">
+    <div class="text-sm text-gray-300 font-bold mb-2">Packing: Bypassing Defenders</div>
+    <div class="flex flex-col space-y-2">
+      <div class="flex items-center">
+        <div class="w-8 h-1 bg-yellow-400 mr-2"></div>
+        <div class="text-xs text-white">Lateral Pass (0 Packed)</div>
+      </div>
+      <div class="flex items-center">
+        <div class="w-8 h-1 bg-blue-400 mr-2"></div>
+        <div class="text-xs text-white">Line-Breaking Pass (5 Packed)</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="packing-pitch" class="w-full h-full relative"></div>
+</div>
+
+<script>
+  import * as d3 from 'd3';
+
+  document.querySelectorAll('.packing-container:not(.initialized)').forEach(container => {
+    container.classList.add('initialized');
+    let hasRendered = false;
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting && !hasRendered) {
+          hasRendered = true;
+          renderChart();
+          observer.disconnect();
+        }
+      });
+    }, { threshold: 0.1 });
+
+    observer.observe(container);
+
+    function renderChart() {
+      const pitchArea = container.querySelector('#packing-pitch');
+      if (!pitchArea) return;
+
+      const width = pitchArea.clientWidth;
+      const height = pitchArea.clientHeight;
+
+      const svg = d3.select(pitchArea)
+        .append('svg')
+        .attr('width', '100%')
+        .attr('height', '100%')
+        .attr('viewBox', `0 0 ${width} ${height}`);
+
+      // Pitch lines
+      svg.append("rect")
+        .attr("x", 0).attr("y", 0).attr("width", width).attr("height", height)
+        .attr("fill", "#166534");
+        
+      // Halfway line
+      svg.append("line").attr("x1", 0).attr("y1", height/2).attr("x2", width).attr("y2", height/2)
+        .attr("stroke", "rgba(255,255,255,0.4)").attr("stroke-width", 2);
+
+      // Define players
+      const startX = width / 2;
+      const startY = height * 0.85;
+
+      const teamA = [
+        { x: startX, y: startY, role: 'Passer' },
+        { x: startX - 80, y: startY - 10, role: 'Lateral Target' },
+        { x: startX, y: height * 0.3, role: 'Forward Target' }
+      ];
+
+      // Defensive block (Red)
+      const teamB = [
+        // Midfield line
+        { x: width * 0.2, y: height * 0.6 },
+        { x: width * 0.4, y: height * 0.65 }, // Between passer and target
+        { x: width * 0.6, y: height * 0.65 }, // Between passer and target
+        { x: width * 0.8, y: height * 0.6 },
+        // Defensive line
+        { x: width * 0.3, y: height * 0.4 },
+        { x: width * 0.5, y: height * 0.45 }, // Between passer and target
+        { x: width * 0.7, y: height * 0.4 }
+      ];
+
+      // Draw Defenders
+      svg.selectAll(".defender")
+        .data(teamB)
+        .enter()
+        .append("circle")
+        .attr("class", "defender")
+        .attr("cx", d => d.x)
+        .attr("cy", d => d.y)
+        .attr("r", 8)
+        .attr("fill", "#ef4444")
+        .attr("stroke", "#ffffff")
+        .attr("stroke-width", 2);
+
+      // Draw Attackers
+      svg.selectAll(".attacker")
+        .data(teamA)
+        .enter()
+        .append("circle")
+        .attr("class", "attacker")
+        .attr("cx", d => d.x)
+        .attr("cy", d => d.y)
+        .attr("r", 8)
+        .attr("fill", "#3b82f6")
+        .attr("stroke", "#ffffff")
+        .attr("stroke-width", 2);
+
+      // Define arrows
+      svg.append("defs").append("marker")
+        .attr("id", "arrow-yellow")
+        .attr("viewBox", "0 0 10 10")
+        .attr("refX", 5)
+        .attr("refY", 5)
+        .attr("markerWidth", 6)
+        .attr("markerHeight", 6)
+        .attr("orient", "auto-start-reverse")
+        .append("path")
+        .attr("d", "M 0 0 L 10 5 L 0 10 z")
+        .attr("fill", "#facc15");
+
+      svg.append("defs").append("marker")
+        .attr("id", "arrow-blue")
+        .attr("viewBox", "0 0 10 10")
+        .attr("refX", 5)
+        .attr("refY", 5)
+        .attr("markerWidth", 6)
+        .attr("markerHeight", 6)
+        .attr("orient", "auto-start-reverse")
+        .append("path")
+        .attr("d", "M 0 0 L 10 5 L 0 10 z")
+        .attr("fill", "#60a5fa");
+
+      // Draw lines
+      const lateralLine = svg.append("line")
+        .attr("x1", teamA[0].x)
+        .attr("y1", teamA[0].y)
+        .attr("x2", teamA[0].x)
+        .attr("y2", teamA[0].y)
+        .attr("stroke", "#facc15")
+        .attr("stroke-width", 3)
+        .attr("stroke-dasharray", "5,5")
+        .attr("marker-end", "url(#arrow-yellow)");
+
+      const forwardLine = svg.append("line")
+        .attr("x1", teamA[0].x)
+        .attr("y1", teamA[0].y)
+        .attr("x2", teamA[0].x)
+        .attr("y2", teamA[0].y)
+        .attr("stroke", "#60a5fa")
+        .attr("stroke-width", 3)
+        .attr("stroke-dasharray", "5,5")
+        .attr("marker-end", "url(#arrow-blue)");
+
+      // Highlight packed defenders
+      const packedIndexes = [1, 2, 4, 5, 6]; // The ones caught behind the forward pass
+
+      function animate() {
+        // Reset
+        lateralLine.attr("x2", teamA[0].x).attr("y2", teamA[0].y).style("opacity", 1);
+        forwardLine.attr("x2", teamA[0].x).attr("y2", teamA[0].y).style("opacity", 1);
+        svg.selectAll(".defender").attr("opacity", 1).attr("stroke", "#ffffff");
+
+        // 1. Animate Lateral Pass
+        lateralLine.transition()
+          .duration(1000)
+          .attr("x2", teamA[1].x)
+          .attr("y2", teamA[1].y);
+
+        // Fade lateral
+        setTimeout(() => {
+          lateralLine.transition().duration(500).style("opacity", 0.2);
+          
+          // 2. Animate Forward Pass
+          forwardLine.transition()
+            .duration(1000)
+            .attr("x2", teamA[2].x)
+            .attr("y2", teamA[2].y);
+            
+          // Highlight packed defenders
+          setTimeout(() => {
+            svg.selectAll(".defender").each(function(d: any, i) {
+              if (packedIndexes.includes(i)) {
+                d3.select(this)
+                  .transition().duration(500)
+                  .attr("opacity", 0.3)
+                  .attr("stroke", "#000000");
+              }
+            });
+          }, 800);
+
+        }, 2000);
+      }
+
+      animate();
+      setInterval(animate, 6000);
+    }
+  });
+</script>

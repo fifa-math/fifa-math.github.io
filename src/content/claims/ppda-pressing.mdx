@@ -1,0 +1,26 @@
+---
+title: "Quantifying the High Press (PPDA)"
+description: "How analysts use Passes Per Defensive Action to mathematically measure pressing intensity."
+claimNumber: 28
+mathConcepts: ["Ratios", "Time Series Analysis"]
+published: true
+---
+import PPDAVisualizer from '../../components/PPDAVisualizer.astro';
+
+When Jurgen Klopp brought "Gegenpressing" to the forefront of modern soccer, analysts needed a way to objectively measure how intensely a team was pressing their opponents. You can't just count tackles, because a team that dominates possession won't have the opportunity to make many tackles.
+
+Enter **PPDA** (Passes allowed Per Defensive Action).
+
+## The Formula
+
+The formula isolates actions in the opponent's defensive and middle thirds of the pitch:
+
+$$ \text{PPDA} = \frac{\text{Opponent Passes}}{\text{Defensive Actions (Tackles, Interceptions, Fouls)}} $$
+
+A **lower** PPDA means the defending team is highly aggressive, allowing very few passes before disrupting the play. A team with a PPDA of 7 is deploying an exhausting, high-octane press. A **higher** PPDA (like 15 or 18) indicates a team that is sitting back in a low block, allowing the opponent to pass the ball freely in their own half.
+
+<div class="my-8">
+  <PPDAVisualizer />
+</div>
+
+Because high pressing requires immense physical stamina, PPDA is frequently used to track team fatigue over 90 minutes. You will mathematically observe a team's PPDA rise sharply in the final 15 minutes of a match as exhaustion sets in and their pressing lines break down.

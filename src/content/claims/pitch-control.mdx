@@ -1,0 +1,24 @@
+---
+title: "Pitch Control & Voronoi Diagrams"
+description: "How optical tracking and computational geometry measure spatial dominance in real-time."
+claimNumber: 29
+mathConcepts: ["Voronoi Diagrams", "Computational Geometry"]
+published: true
+---
+import PitchControlVisualizer from '../../components/PitchControlVisualizer.astro';
+
+When Johan Cruyff said, "Football is a game of space," he was describing a mathematical concept that modern analysts now measure using **Pitch Control**.
+
+Instead of just tracking where the ball is, Pitch Control models calculate the probability that a player from a specific team could reach any given spot on the pitch before an opponent.
+
+## Voronoi Tessellation
+
+The most fundamental mathematical way to visualize this space is using a **Voronoi Diagram**. A Voronoi diagram partitions a plane into regions based on distance to points in a specific subset of the plane. 
+
+In soccer, the points are the players. The region assigned to a player is the area of the pitch that is mathematically closer to them than to any other player on the field.
+
+<div class="my-8">
+  <PitchControlVisualizer />
+</div>
+
+By integrating player velocity vectors (speed and direction) gathered from optical tracking cameras, analysts can warp these Voronoi cells to calculate exactly which team "owns" the space. A team can have only 30% possession of the ball, but dominate 60% of the valuable Pitch Control zones, choking out the opponent's passing lanes.

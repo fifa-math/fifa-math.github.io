@@ -1,0 +1,201 @@
+---
+// src/components/XGMapVisualizer.astro
+---
+<div class="xgmap-container" role="figure" aria-label="Expected Goals Map Visualization" class="w-full h-[500px] border border-gray-200 rounded-lg bg-green-800 relative flex flex-col items-center overflow-hidden">
+  
+  <div class="absolute top-4 left-4 z-10 bg-slate-900/80 p-3 rounded-lg border border-slate-700 pointer-events-none">
+    <div class="text-sm text-gray-300">Selected Shot xG</div>
+    <div id="xg-score" class="text-3xl font-bold text-white mt-1">0.00</div>
+    <div id="xg-desc" class="text-xs text-blue-400 mt-1">Click anywhere in the attacking half</div>
+  </div>
+
+  <div id="pitch-area" class="w-full flex-1 relative cursor-crosshair"></div>
+</div>
+
+<script>
+  import * as d3 from 'd3';
+
+  document.querySelectorAll('.xgmap-container:not(.initialized)').forEach(container => {
+    container.classList.add('initialized');
+    let hasRendered = false;
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting && !hasRendered) {
+          hasRendered = true;
+          renderChart();
+          observer.disconnect();
+        }
+      });
+    }, { threshold: 0.1 });
+
+    observer.observe(container);
+
+    function renderChart() {
+      const pitchArea = container.querySelector('#pitch-area');
+      if (!pitchArea) return;
+      
+      const width = pitchArea.clientWidth;
+      const height = pitchArea.clientHeight;
+
+      const svg = d3.select(pitchArea)
+        .append('svg')
+        .attr('width', '100%')
+        .attr('height', '100%')
+        .attr('viewBox', `0 0 ${width} ${height}`);
+
+      // Draw pitch lines (attacking half)
+      // Goal at top center
+      svg.append("rect")
+        .attr("x", width / 2 - 40)
+        .attr("y", 0)
+        .attr("width", 80)
+        .attr("height", 10)
+        .attr("fill", "white");
+        
+      // Penalty box
+      svg.append("rect")
+        .attr("x", width / 2 - 120)
+        .attr("y", 10)
+        .attr("width", 240)
+        .attr("height", 100)
+        .attr("fill", "none")
+        .attr("stroke", "rgba(255,255,255,0.4)")
+        .attr("stroke-width", 2);
+        
+      // 6-yard box
+      svg.append("rect")
+        .attr("x", width / 2 - 40)
+        .attr("y", 10)
+        .attr("width", 80)
+        .attr("height", 30)
+        .attr("fill", "none")
+        .attr("stroke", "rgba(255,255,255,0.4)")
+        .attr("stroke-width", 2);
+        
+      // Penalty spot
+      svg.append("circle")
+        .attr("cx", width / 2)
+        .attr("cy", 70)
+        .attr("r", 3)
+        .attr("fill", "white");
+        
+      // Penalty arc
+      svg.append("path")
+        .attr("d", `M ${width/2 - 40} 110 A 40 40 0 0 0 ${width/2 + 40} 110`)
+        .attr("fill", "none")
+        .attr("stroke", "rgba(255,255,255,0.4)")
+        .attr("stroke-width", 2);
+
+      // Add a gradient heatmap for reference
+      const defs = svg.append("defs");
+      const radialGradient = defs.append("radialGradient")
+        .attr("id", "xg-gradient")
+        .attr("cx", "50%")
+        .attr("cy", "0%")
+        .attr("r", "100%");
+      radialGradient.append("stop").attr("offset", "0%").style("stop-color", "rgba(239, 68, 68, 0.4)");
+      radialGradient.append("stop").attr("offset", "15%").style("stop-color", "rgba(234, 179, 8, 0.2)");
+      radialGradient.append("stop").attr("offset", "50%").style("stop-color", "rgba(0, 0, 0, 0)");
+
+      svg.append("rect")
+        .attr("width", "100%")
+        .attr("height", "100%")
+        .attr("fill", "url(#xg-gradient)")
+        .style("pointer-events", "none");
+
+      const shotMarker = svg.append("circle")
+        .attr("r", 8)
+        .attr("fill", "#3b82f6")
+        .attr("stroke", "white")
+        .attr("stroke-width", 2)
+        .style("opacity", 0);
+
+      const shotLine1 = svg.append("line").attr("stroke", "rgba(59, 130, 246, 0.5)").attr("stroke-width", 2).attr("stroke-dasharray", "4,4").style("opacity", 0);
+      const shotLine2 = svg.append("line").attr("stroke", "rgba(59, 130, 246, 0.5)").attr("stroke-width", 2).attr("stroke-dasharray", "4,4").style("opacity", 0);
+
+      const xgScore = container.querySelector('#xg-score');
+      const xgDesc = container.querySelector('#xg-desc');
+
+      // Click to place shot
+      d3.select(pitchArea).on("click", (event) => {
+        const [x, y] = d3.pointer(event);
+        
+        // Calculate simplified xG
+        // Goal center is (width/2, 10). Goal width is 80.
+        const leftPostX = width / 2 - 40;
+        const rightPostX = width / 2 + 40;
+        const goalY = 10;
+        
+        // Distance
+        const dist = Math.sqrt(Math.pow(width/2 - x, 2) + Math.pow(y - goalY, 2));
+        
+        // Angle calculation (dot product)
+        const v1x = leftPostX - x;
+        const v1y = goalY - y;
+        const v2x = rightPostX - x;
+        const v2y = goalY - y;
+        const dot = v1x * v2x + v1y * v2y;
+        const mag1 = Math.sqrt(v1x*v1x + v1y*v1y);
+        const mag2 = Math.sqrt(v2x*v2x + v2y*v2y);
+        const angleRad = Math.acos(dot / (mag1 * mag2));
+        
+        // Base probability calculation
+        // Close distance = high prob. Wide angle = high prob.
+        // Penalty is dist=60, angle=~30deg. xG = 0.79
+        let xg = 0;
+        
+        // Heuristic formula
+        const angleWeight = angleRad / Math.PI; // 0 to 1
+        const distWeight = Math.max(0, 1 - (dist / (height * 0.8))); // 0 to 1
+        
+        xg = (angleWeight * 0.7) + (distWeight * 0.3) - 0.1;
+        xg = Math.max(0.01, Math.min(0.99, Math.pow(xg, 1.5))); // Curve it
+        
+        if (y < 10) xg = 0; // Behind goal line
+
+        // Update visuals
+        shotMarker
+          .attr("cx", x)
+          .attr("cy", y)
+          .style("opacity", 1);
+          
+        shotLine1
+          .attr("x1", x).attr("y1", y)
+          .attr("x2", leftPostX).attr("y2", goalY)
+          .style("opacity", 1);
+          
+        shotLine2
+          .attr("x1", x).attr("y1", y)
+          .attr("x2", rightPostX).attr("y2", goalY)
+          .style("opacity", 1);
+
+        if (xgScore && xgDesc) {
+          xgScore.textContent = xg.toFixed(2);
+          
+          if (xg > 0.3) {
+            xgScore.className = "text-3xl font-bold text-red-400 mt-1";
+            xgDesc.textContent = "High Quality Chance";
+          } else if (xg > 0.08) {
+            xgScore.className = "text-3xl font-bold text-yellow-400 mt-1";
+            xgDesc.textContent = "Average Chance";
+          } else {
+            xgScore.className = "text-3xl font-bold text-slate-300 mt-1";
+            xgDesc.textContent = "Low Quality Speculative Shot";
+          }
+        }
+      });
+      
+      // Simulate click on penalty spot
+      setTimeout(() => {
+        const event = new MouseEvent('click', {
+          clientX: width / 2,
+          clientY: 70
+        });
+        const fakeEvent = { pageX: width/2, pageY: 70, target: pitchArea, type: 'click' };
+        // D3 pointer requires real event coordinates. We'll trigger it using d3 directly.
+        d3.select(pitchArea).node()?.dispatchEvent(new MouseEvent('click', { bubbles: true, clientX: pitchArea.getBoundingClientRect().left + width/2, clientY: pitchArea.getBoundingClientRect().top + 70 }));
+      }, 500);
+    }
+  });
+</script>

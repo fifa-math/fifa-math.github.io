@@ -1,0 +1,24 @@
+---
+title: "The Math of Expected Goals (xG)"
+description: "How historical data and spatial geometry calculate the exact probability of a shot resulting in a goal."
+claimNumber: 27
+mathConcepts: ["Probability Models", "Spatial Geometry"]
+published: true
+---
+import XGMapVisualizer from '../../components/XGMapVisualizer.astro';
+
+For over a century, soccer fans debated which striker was the best by simply counting goals. Today, analysts use **Expected Goals (xG)**, a mathematical model that assigns a probability (between 0.00 and 1.00) to a shot based on historical data.
+
+## Calculating xG
+
+The xG algorithm factors in several variables, but the most mathematically significant are:
+1. **Distance to Goal**: The closer the shot, the higher the probability.
+2. **Shot Angle**: The wider the angle to the posts, the larger the target area.
+
+<div class="my-8">
+  <XGMapVisualizer />
+</div>
+
+When a player takes a shot from 30 yards out (yielding an xG of 0.03), it means statistically, that shot will only result in a goal 3 out of 100 times. A tap-in at the back post might carry an xG of 0.95.
+
+By evaluating a team's cumulative xG over a 38-game season, analysts can mathematical strip away the variance of "luck" or spectacular goalkeeping to determine a team's true attacking power.
