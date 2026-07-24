@@ -7,8 +7,7 @@ import remarkMermaid from 'remark-mermaidjs';
 
 // https://astro.build/config
 export default defineConfig({
-  site: 'https://oresoftware.github.io',
-  base: '/soccer-math',
+  site: 'https://fifa-math.github.io',
   integrations: [
     mdx(),
   ],
