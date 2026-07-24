@@ -6,7 +6,7 @@ export interface Props {
 const { goalWidth } = Astro.props;
 ---
 <div class="w-full flex flex-col items-center">
-  <div id="angle-info" class="text-xl font-bold mb-4 text-blue-400">Angle: 0°</div>
+  <div class="angle-info" role="figure" aria-label="AngleVisualizer Data Visualization" class="text-xl font-bold mb-4 text-blue-400">Angle: 0°</div>
   <div id="angle-container" class="w-full h-[500px] border border-gray-200 rounded-lg bg-green-800 relative cursor-crosshair overflow-hidden" data-goal-width={goalWidth}>
   </div>
   <p class="mt-2 text-sm text-gray-400">Drag the white dot along the right flank to see the angle change.</p>
@@ -15,10 +15,11 @@ const { goalWidth } = Astro.props;
 <script>
   import * as d3 from 'd3';
 
-  const container = document.getElementById('angle-container');
-  const info = document.getElementById('angle-info');
-  
-  if (container && info) {
+  document.querySelectorAll('.angle-container:not(.initialized)').forEach(container => {
+    container.classList.add('initialized');
+    const info = container.parentElement?.querySelector('.angle-info');
+    
+    if (info) {
     const goalWidth = parseFloat(container.dataset.goalWidth || '7.32');
     // Scale: 1 unit = 1 meter. Let's make the container represent roughly 40m x 40m
     const width = container.clientWidth;
@@ -150,5 +151,6 @@ const { goalWidth } = Astro.props;
     
     // Initial draw
     update(attackerY);
-  }
+    }
+  });
 </script>

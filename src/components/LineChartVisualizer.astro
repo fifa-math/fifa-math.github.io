@@ -1,15 +1,14 @@
 ---
 // src/components/LineChartVisualizer.astro
 ---
-<div id="linechart-container" class="w-full h-[400px] border border-gray-200 rounded-lg bg-slate-800 relative">
+<div class="linechart-container" role="figure" aria-label="LineChartVisualizer Data Visualization" class="w-full h-[400px] border border-gray-200 rounded-lg bg-slate-800 relative">
 </div>
 
 <script>
   import * as d3 from 'd3';
 
-  const container = document.getElementById('linechart-container');
-  
-  if (container) {
+  document.querySelectorAll('.linechart-container:not(.initialized)').forEach(container => {
+    container.classList.add('initialized');
     const width = container.clientWidth;
     const height = container.clientHeight;
     const margin = {top: 20, right: 30, bottom: 40, left: 50};
@@ -92,5 +91,5 @@
     
     legend.append("rect").attr("x", 0).attr("y", 40).attr("width", 10).attr("height", 10).attr("fill", "#ef4444");
     legend.append("text").attr("x", 15).attr("y", 50).text("Loss").attr("fill", "#cbd5e1").style("font-size", "12px");
-  }
+  });
 </script>

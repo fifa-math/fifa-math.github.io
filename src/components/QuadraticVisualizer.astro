@@ -1,15 +1,14 @@
 ---
 // src/components/QuadraticVisualizer.astro
 ---
-<div id="quadratic-container" class="w-full h-[400px] border border-gray-200 rounded-lg bg-slate-800 relative">
+<div class="quadratic-container" role="figure" aria-label="QuadraticVisualizer Data Visualization" class="w-full h-[400px] border border-gray-200 rounded-lg bg-slate-800 relative">
 </div>
 
 <script>
   import * as d3 from 'd3';
 
-  const container = document.getElementById('quadratic-container');
-  
-  if (container) {
+  document.querySelectorAll('.quadratic-container:not(.initialized)').forEach(container => {
+    container.classList.add('initialized');
     let hasRendered = false;
 
     const observer = new IntersectionObserver((entries) => {
@@ -17,6 +16,7 @@
         if (entry.isIntersecting && !hasRendered) {
           hasRendered = true;
           renderChart();
+          observer.disconnect();
         }
       });
     }, { threshold: 0.1 });
@@ -73,7 +73,7 @@
 
       // Y Axis
       svg.append("g")
-        .call(d3.axisLeft(y).tickFormat(() => "")) // Hide Y axis numbers to abstract it
+        .call(d3.axisLeft(y).tickFormat(() => "").tickSize(0)) // Hide Y axis numbers to abstract it
         .attr("color", "#94a3b8");
 
       svg.append("text")
@@ -144,5 +144,5 @@
         .duration(500)
         .style("opacity", 1);
     }
-  }
+  });
 </script>

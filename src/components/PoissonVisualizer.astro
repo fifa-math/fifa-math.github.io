@@ -5,7 +5,7 @@ export interface Props {
 }
 const { lambda } = Astro.props;
 ---
-<div id="poisson-container" class="w-full h-[400px] border border-gray-200 rounded-lg bg-slate-800" data-lambda={lambda}>
+<div class="poisson-container" role="figure" aria-label="PoissonVisualizer Data Visualization" class="w-full h-[400px] border border-gray-200 rounded-lg bg-slate-800" data-lambda={lambda}>
 </div>
 
 <script>
@@ -25,9 +25,8 @@ const { lambda } = Astro.props;
     return (Math.pow(Math.E, -lambda) * Math.pow(lambda, k)) / factorial(k);
   }
 
-  const container = document.getElementById('poisson-container');
-  
-  if (container) {
+  document.querySelectorAll('.poisson-container:not(.initialized)').forEach(container => {
+    container.classList.add('initialized');
     const lambda = parseFloat(container.dataset.lambda || '1.2');
     
     // Generate data for 0 to 6 goals
@@ -124,5 +123,5 @@ const { lambda } = Astro.props;
       .style("font-weight", "bold")
       .style("fill", "#f8fafc")
       .text(`Poisson Distribution (λ = ${lambda})`);
-  }
+  });
 </script>

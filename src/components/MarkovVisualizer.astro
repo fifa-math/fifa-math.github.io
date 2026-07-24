@@ -1,15 +1,14 @@
 ---
 // src/components/MarkovVisualizer.astro
 ---
-<div id="markov-container" class="w-full h-[400px] border border-gray-200 rounded-lg bg-slate-800 relative">
+<div class="markov-container" role="figure" aria-label="MarkovVisualizer Data Visualization" class="w-full h-[400px] border border-gray-200 rounded-lg bg-slate-800 relative">
 </div>
 
 <script>
   import * as d3 from 'd3';
 
-  const container = document.getElementById('markov-container');
-  
-  if (container) {
+  document.querySelectorAll('.markov-container:not(.initialized)').forEach(container => {
+    container.classList.add('initialized');
     const width = container.clientWidth;
     const height = container.clientHeight;
 
@@ -118,5 +117,5 @@
       .attr("fill", "white")
       .attr("font-size", "14px")
       .attr("font-weight", "bold");
-  }
+  });
 </script>

@@ -1,15 +1,14 @@
 ---
 // src/components/HeatmapVisualizer.astro
 ---
-<div id="heatmap-container" class="w-full h-[400px] border border-gray-200 rounded-lg bg-slate-800 relative flex justify-center items-center overflow-hidden">
+<div class="heatmap-container" role="figure" aria-label="HeatmapVisualizer Data Visualization" class="w-full h-[400px] border border-gray-200 rounded-lg bg-slate-800 relative flex justify-center items-center overflow-hidden">
 </div>
 
 <script>
   import * as d3 from 'd3';
 
-  const container = document.getElementById('heatmap-container');
-  
-  if (container) {
+  document.querySelectorAll('.heatmap-container:not(.initialized)').forEach(container => {
+    container.classList.add('initialized');
     let hasRendered = false;
 
     const observer = new IntersectionObserver((entries) => {
@@ -17,6 +16,7 @@
         if (entry.isIntersecting && !hasRendered) {
           hasRendered = true;
           renderChart();
+          observer.disconnect();
         }
       });
     }, { threshold: 0.1 });
@@ -126,5 +126,5 @@
         .style("font-size", "14px")
         .text("GK's Left (Shooter's Right)");
     }
-  }
+  });
 </script>

@@ -1,15 +1,14 @@
 ---
 // src/components/TrajectoryVisualizer.astro
 ---
-<div id="trajectory-container" class="w-full h-[400px] border border-gray-200 rounded-lg bg-slate-800 relative flex justify-center items-center overflow-hidden">
+<div class="trajectory-container" role="figure" aria-label="TrajectoryVisualizer Data Visualization" class="w-full h-[400px] border border-gray-200 rounded-lg bg-slate-800 relative flex justify-center items-center overflow-hidden">
 </div>
 
 <script>
   import * as d3 from 'd3';
 
-  const container = document.getElementById('trajectory-container');
-  
-  if (container) {
+  document.querySelectorAll('.trajectory-container:not(.initialized)').forEach(container => {
+    container.classList.add('initialized');
     let hasRendered = false;
 
     const observer = new IntersectionObserver((entries) => {
@@ -17,6 +16,7 @@
         if (entry.isIntersecting && !hasRendered) {
           hasRendered = true;
           renderChart();
+          observer.disconnect();
         }
       });
     }, { threshold: 0.1 });
@@ -165,5 +165,5 @@
         .style("opacity", 0)
         .transition().delay(2500).style("opacity", 1);
     }
-  }
+  });
 </script>

@@ -1,15 +1,14 @@
 ---
 // src/components/DensityVisualizer.astro
 ---
-<div id="density-container" class="w-full h-[400px] border border-gray-200 rounded-lg bg-slate-800 relative">
+<div class="density-container" role="figure" aria-label="DensityVisualizer Data Visualization" class="w-full h-[400px] border border-gray-200 rounded-lg bg-slate-800 relative">
 </div>
 
 <script>
   import * as d3 from 'd3';
 
-  const container = document.getElementById('density-container');
-  
-  if (container) {
+  document.querySelectorAll('.density-container:not(.initialized)').forEach(container => {
+    container.classList.add('initialized');
     let hasRendered = false;
 
     const observer = new IntersectionObserver((entries) => {
@@ -17,6 +16,7 @@
         if (entry.isIntersecting && !hasRendered) {
           hasRendered = true;
           renderChart();
+          observer.disconnect();
         }
       });
     }, { threshold: 0.1 });
@@ -145,5 +145,5 @@
         .duration(500)
         .style("opacity", 1);
     }
-  }
+  });
 </script>

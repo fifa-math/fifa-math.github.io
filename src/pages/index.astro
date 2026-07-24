@@ -3,7 +3,7 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { getCollection, render } from 'astro:content';
 
-const claims = await getCollection('claims');
+const claims = (await getCollection('claims')).filter(c => c.data.published === true);
 // Sort claims by claimNumber
 claims.sort((a, b) => a.data.claimNumber - b.data.claimNumber);
 ---

@@ -1,15 +1,14 @@
 ---
 // src/components/ScatterPlotVisualizer.astro
 ---
-<div id="scatter-container" class="w-full h-[400px] border border-gray-200 rounded-lg bg-slate-800 relative">
+<div class="scatter-container" role="figure" aria-label="ScatterPlotVisualizer Data Visualization" class="w-full h-[400px] border border-gray-200 rounded-lg bg-slate-800 relative">
 </div>
 
 <script>
   import * as d3 from 'd3';
 
-  const container = document.getElementById('scatter-container');
-  
-  if (container) {
+  document.querySelectorAll('.scatter-container:not(.initialized)').forEach(container => {
+    container.classList.add('initialized');
     const width = container.clientWidth;
     const height = container.clientHeight;
     const margin = {top: 20, right: 30, bottom: 40, left: 50};
@@ -109,5 +108,5 @@
       .attr("stroke", "#ef4444")
       .attr("stroke-width", 2)
       .attr("stroke-dasharray", "5,5");
-  }
+  });
 </script>

@@ -1,15 +1,14 @@
 ---
 // src/components/RegressionVisualizer.astro
 ---
-<div id="regression-container" class="w-full h-[400px] border border-gray-200 rounded-lg bg-slate-800 relative">
+<div class="regression-container" role="figure" aria-label="RegressionVisualizer Data Visualization" class="w-full h-[400px] border border-gray-200 rounded-lg bg-slate-800 relative">
 </div>
 
 <script>
   import * as d3 from 'd3';
 
-  const container = document.getElementById('regression-container');
-  
-  if (container) {
+  document.querySelectorAll('.regression-container:not(.initialized)').forEach(container => {
+    container.classList.add('initialized');
     let hasRendered = false;
 
     const observer = new IntersectionObserver((entries) => {
@@ -17,6 +16,7 @@
         if (entry.isIntersecting && !hasRendered) {
           hasRendered = true;
           renderChart();
+          observer.disconnect();
         }
       });
     }, { threshold: 0.1 });
@@ -174,5 +174,5 @@
       svg.append("text").attr("x", x(4)).attr("y", y(0.9) - 15).attr("fill", "#fff").attr("text-anchor", "middle").style("font-size", "12px").text("Hot Streak").style("opacity", 0).transition().delay(2500).style("opacity", 1);
       svg.append("text").attr("x", x(18)).attr("y", y(0.15) + 20).attr("fill", "#fff").attr("text-anchor", "middle").style("font-size", "12px").text("Goal Drought").style("opacity", 0).transition().delay(2500).style("opacity", 1);
     }
-  }
+  });
 </script>
