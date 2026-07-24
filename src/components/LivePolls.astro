@@ -1,0 +1,104 @@
+---
+// src/components/LivePolls.astro
+---
+<div class="bg-slate-900 border border-slate-700 rounded-xl overflow-hidden shadow-lg">
+  <div class="bg-slate-800 px-4 py-3 border-b border-slate-700 flex items-center justify-between">
+    <div class="flex items-center space-x-2">
+      <svg class="w-5 h-5 text-blue-400" fill="currentColor" viewBox="0 0 24 24"><path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/></svg>
+      <h3 class="text-white font-bold text-lg">Trending Soccer Polls</h3>
+    </div>
+    <span class="animate-pulse flex h-3 w-3 relative">
+      <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+      <span class="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
+    </span>
+  </div>
+
+  <div class="p-5">
+    <div class="poll-container flex space-x-3" data-voted="false">
+      <!-- Avatar -->
+      <div class="w-12 h-12 rounded-full bg-blue-600 flex-shrink-0 flex items-center justify-center text-white font-bold text-xl">
+        FP
+      </div>
+      
+      <!-- Content -->
+      <div class="flex-1">
+        <div class="flex items-center space-x-1">
+          <span class="font-bold text-white">Football Polls</span>
+          <svg class="w-4 h-4 text-blue-400" viewBox="0 0 24 24" fill="currentColor"><path d="M22.5 12.5c0-1.58-.875-2.95-2.148-3.6.154-.435.238-.905.238-1.4 0-2.21-1.71-3.998-3.918-3.998-.47 0-.92.084-1.336.25C14.818 2.415 13.51 1.5 12 1.5s-2.816.917-3.337 2.25c-.416-.165-.866-.25-1.336-.25-2.21 0-3.918 1.79-3.918 4 0 .495.084.965.238 1.4-1.273.65-2.147 2.02-2.147 3.6 0 1.495.782 2.798 1.942 3.486-.02.17-.032.34-.032.514 0 2.21 1.708 4 3.918 4 .57 0 1.11-.13 1.6-.355C9.565 21.358 10.708 22.5 12 22.5c1.29 0 2.435-1.14 2.97-2.755.49.224 1.03.355 1.6.355 2.21 0 3.918-1.79 3.918-4 0-.174-.012-.344-.033-.513 1.158-.69 1.94-1.99 1.94-3.487zM10.45 15.5l-3.23-3.23 1.414-1.414 1.816 1.816 4.316-4.316 1.414 1.414-5.73 5.73z"/></svg>
+          <span class="text-slate-400 text-sm">@FootballPolls · 2h</span>
+        </div>
+        <p class="text-white mt-2 mb-3">Who is the mathematically most efficient forward in Europe right now based on Non-Penalty xG per 90?</p>
+        
+        <div class="space-y-2 poll-options">
+          <button class="poll-option w-full relative bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded-full py-2 px-4 text-left font-semibold text-blue-400 transition-colors group overflow-hidden" data-votes="42">
+            <span class="relative z-10 option-text">Erling Haaland</span>
+            <span class="relative z-10 float-right opacity-0 option-percent text-white"></span>
+            <div class="absolute inset-0 bg-blue-600/30 w-0 transition-all duration-1000 ease-out result-bar"></div>
+          </button>
+          
+          <button class="poll-option w-full relative bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded-full py-2 px-4 text-left font-semibold text-blue-400 transition-colors group overflow-hidden" data-votes="28">
+            <span class="relative z-10 option-text">Harry Kane</span>
+            <span class="relative z-10 float-right opacity-0 option-percent text-white"></span>
+            <div class="absolute inset-0 bg-blue-600/30 w-0 transition-all duration-1000 ease-out result-bar"></div>
+          </button>
+          
+          <button class="poll-option w-full relative bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded-full py-2 px-4 text-left font-semibold text-blue-400 transition-colors group overflow-hidden" data-votes="18">
+            <span class="relative z-10 option-text">Kylian Mbappé</span>
+            <span class="relative z-10 float-right opacity-0 option-percent text-white"></span>
+            <div class="absolute inset-0 bg-blue-600/30 w-0 transition-all duration-1000 ease-out result-bar"></div>
+          </button>
+          
+          <button class="poll-option w-full relative bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded-full py-2 px-4 text-left font-semibold text-blue-400 transition-colors group overflow-hidden" data-votes="12">
+            <span class="relative z-10 option-text">Lautaro Martínez</span>
+            <span class="relative z-10 float-right opacity-0 option-percent text-white"></span>
+            <div class="absolute inset-0 bg-blue-600/30 w-0 transition-all duration-1000 ease-out result-bar"></div>
+          </button>
+        </div>
+        
+        <div class="text-slate-500 text-sm mt-3 flex items-center">
+          <span class="total-votes">84,213 votes</span>
+          <span class="mx-2">·</span>
+          <span>Final results</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.querySelectorAll('.poll-container').forEach(container => {
+    const options = container.querySelectorAll('.poll-option');
+    const totalVotes = Array.from(options).reduce((acc, opt) => acc + parseInt(opt.getAttribute('data-votes') || '0'), 0);
+    
+    options.forEach(option => {
+      option.addEventListener('click', () => {
+        if (container.getAttribute('data-voted') === 'true') return;
+        
+        container.setAttribute('data-voted', 'true');
+        
+        // The one we clicked gets a special border
+        option.classList.remove('border-slate-600');
+        option.classList.add('border-blue-500');
+        
+        options.forEach(opt => {
+          // Disable hovering
+          opt.classList.remove('hover:bg-slate-700', 'text-blue-400');
+          opt.classList.add('text-white', 'cursor-default');
+          
+          // Calculate percentage
+          const votes = parseInt(opt.getAttribute('data-votes') || '0');
+          const percent = Math.round((votes / totalVotes) * 100);
+          
+          // Show percentage text
+          const pctSpan = opt.querySelector('.option-percent') as HTMLElement;
+          pctSpan.textContent = `${percent}%`;
+          pctSpan.classList.remove('opacity-0');
+          
+          // Animate bar
+          const bar = opt.querySelector('.result-bar') as HTMLElement;
+          bar.style.width = `${percent}%`;
+        });
+      });
+    });
+  });
+</script>

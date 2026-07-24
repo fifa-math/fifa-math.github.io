@@ -2,6 +2,8 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { getCollection, render } from 'astro:content';
 import TableOfContents from '../components/TableOfContents.astro';
+import LivePolls from '../components/LivePolls.astro';
+import LiveTransfers from '../components/LiveTransfers.astro';
 
 const claims = (await getCollection('claims')).filter(c => c.data.published === true);
 // Get all published claims and sort them by claimNumber
@@ -17,6 +19,12 @@ claims.sort((a, b) => a.data.claimNumber - b.data.claimNumber);
   </div>
 
   <TableOfContents claims={claims} />
+
+  <!-- Live Hub Dashboard -->
+  <div class="mb-16 grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <LivePolls />
+    <LiveTransfers />
+  </div>
 
   <div class="space-y-16">
     {claims.map(async (claim) => {

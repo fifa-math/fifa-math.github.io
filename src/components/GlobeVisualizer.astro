@@ -14,6 +14,17 @@
   </div>
 
   <div id="globe-canvas" class="w-full h-full cursor-move relative"></div>
+  
+  <!-- Tooltip Element -->
+  <div id="globe-tooltip" class="absolute pointer-events-none opacity-0 transition-opacity duration-200 z-50 bg-slate-800 border border-slate-600 rounded-lg shadow-2xl p-3 flex items-center space-x-3 transform -translate-x-1/2 -translate-y-[120%]">
+    <div class="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-lg border-2 border-slate-500" id="tt-badge" style="background: linear-gradient(135deg, #3b82f6, #1e40af);">
+      M
+    </div>
+    <div>
+      <div id="tt-name" class="text-white font-bold text-sm">Club Name</div>
+      <div id="tt-stat" class="text-blue-400 font-semibold text-xs mt-0.5">Value</div>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -143,17 +154,69 @@
         const circles = dataGroup.selectAll("circle.club")
           .data(clubs);
 
+        const tooltip = container.querySelector('#globe-tooltip') as HTMLElement;
+        const ttName = container.querySelector('#tt-name') as HTMLElement;
+        const ttStat = container.querySelector('#tt-stat') as HTMLElement;
+        const ttBadge = container.querySelector('#tt-badge') as HTMLElement;
+
+        // Generate a pseudo-random color based on string
+        const stringToColor = (str: string) => {
+          let hash = 0;
+          for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
+          const c = (hash & 0x00FFFFFF).toString(16).toUpperCase();
+          return '#' + '00000'.substring(0, 6 - c.length) + c;
+        };
+
+        const getMetricLabel = (metric: string, val: number) => {
+          if (metric === 'attendance') return `${Math.round(val).toLocaleString()} fans`;
+          if (metric === 'revenue') return `€${Math.round(val)}M Revenue`;
+          return `${Math.round(val)}M Viewers`;
+        };
+
         circles.enter()
           .append("circle")
           .attr("class", "club")
+          .on("mouseover", function(event, d: any) {
+            d3.select(this)
+              .transition().duration(200)
+              .attr("stroke-width", 2)
+              .attr("stroke", "#fbbf24")
+              .attr("r", scale(d[currentMetric as keyof typeof d] as number) * 1.5);
+              
+            tooltip.style.opacity = '1';
+            ttName.textContent = d.name;
+            ttStat.textContent = getMetricLabel(currentMetric, d[currentMetric as keyof typeof d]);
+            ttBadge.textContent = d.name.substring(0, 1);
+            
+            const color1 = stringToColor(d.name);
+            const color2 = stringToColor(d.name.split('').reverse().join(''));
+            ttBadge.style.background = `linear-gradient(135deg, ${color1}, ${color2})`;
+          })
+          .on("mousemove", function(event) {
+            // Position tooltip relative to container
+            const containerRect = container.getBoundingClientRect();
+            const x = event.clientX - containerRect.left;
+            const y = event.clientY - containerRect.top;
+            tooltip.style.left = `${x}px`;
+            tooltip.style.top = `${y}px`;
+          })
+          .on("mouseout", function(event, d: any) {
+            d3.select(this)
+              .transition().duration(200)
+              .attr("stroke-width", 1)
+              .attr("stroke", "#ffffff")
+              .attr("r", scale(d[currentMetric as keyof typeof d] as number));
+              
+            tooltip.style.opacity = '0';
+          })
           .merge(circles as any)
           .transition()
           .duration(1000)
           .attr("r", d => scale(d[currentMetric as keyof typeof d] as number))
           .attr("fill", () => {
-            if (currentMetric === 'attendance') return "rgba(59, 130, 246, 0.6)"; // Blue
-            if (currentMetric === 'revenue') return "rgba(234, 179, 8, 0.6)"; // Yellow
-            return "rgba(239, 68, 68, 0.6)"; // Red
+            if (currentMetric === 'attendance') return "rgba(59, 130, 246, 0.7)"; // Blue
+            if (currentMetric === 'revenue') return "rgba(234, 179, 8, 0.7)"; // Yellow
+            return "rgba(239, 68, 68, 0.7)"; // Red
           })
           .attr("stroke", "#ffffff")
           .attr("stroke-width", 1);

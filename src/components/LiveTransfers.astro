@@ -1,0 +1,108 @@
+---
+// src/components/LiveTransfers.astro
+---
+<div class="bg-slate-900 border border-slate-700 rounded-xl overflow-hidden shadow-lg flex flex-col h-full">
+  <div class="bg-slate-800 px-4 py-3 border-b border-slate-700 flex items-center justify-between">
+    <div class="flex items-center space-x-2">
+      <svg class="w-5 h-5 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+      <h3 class="text-white font-bold text-lg">Live Transfer Rumors</h3>
+    </div>
+    <div class="text-xs text-slate-400 font-mono" id="transfer-time">Updating...</div>
+  </div>
+
+  <div class="p-0 flex-1 overflow-y-auto max-h-[400px]" id="transfer-feed">
+    <!-- Loading State -->
+    <div class="p-6 flex flex-col items-center justify-center h-full text-slate-500 space-y-3">
+      <svg class="animate-spin h-8 w-8 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+      </svg>
+      <p>Intercepting global transfer wire...</p>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Sky Sports Transfer Centre RSS Feed via rss2json proxy
+  const RSS_URL = 'https://www.skysports.com/rss/12040';
+  const API_URL = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(RSS_URL)}`;
+
+  async function fetchTransfers() {
+    const feedContainer = document.getElementById('transfer-feed');
+    const timeDisplay = document.getElementById('transfer-time');
+    
+    if (!feedContainer || !timeDisplay) return;
+
+    try {
+      const response = await fetch(API_URL);
+      const data = await response.json();
+
+      if (data.status === 'ok' && data.items) {
+        // Clear loading state
+        feedContainer.innerHTML = '';
+        
+        // Update time
+        const now = new Date();
+        timeDisplay.textContent = `LIVE · ${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+
+        // Render items
+        data.items.slice(0, 10).forEach((item: any, index: number) => {
+          const pubDate = new Date(item.pubDate);
+          let timeAgo = '';
+          const diffMins = Math.floor((now.getTime() - pubDate.getTime()) / 60000);
+          
+          if (diffMins < 60) timeAgo = `${diffMins}m ago`;
+          else timeAgo = `${Math.floor(diffMins / 60)}h ago`;
+
+          // Try to extract an image if available in description
+          let imgMatch = item.description.match(/<img[^>]+src="([^">]+)"/);
+          let imgSrc = imgMatch ? imgMatch[1] : null;
+          
+          // Clean description from HTML
+          let cleanDesc = item.description.replace(/<[^>]*>?/gm, '').trim();
+          if (cleanDesc.length > 100) cleanDesc = cleanDesc.substring(0, 100) + '...';
+
+          const article = document.createElement('a');
+          article.href = item.link;
+          article.target = '_blank';
+          article.className = 'block p-4 border-b border-slate-700/50 hover:bg-slate-800 transition-colors group';
+          
+          article.innerHTML = `
+            <div class="flex items-start justify-between mb-1">
+              <span class="text-xs font-bold text-green-400">TRANSFER NEWS</span>
+              <span class="text-xs text-slate-500">${timeAgo}</span>
+            </div>
+            <h4 class="text-sm font-bold text-slate-200 group-hover:text-blue-400 transition-colors leading-tight mb-2">${item.title}</h4>
+            <p class="text-xs text-slate-400 line-clamp-2">${cleanDesc}</p>
+          `;
+          
+          // Staggered animation
+          article.style.opacity = '0';
+          article.style.transform = 'translateY(10px)';
+          article.style.transition = 'all 0.3s ease-out';
+          
+          feedContainer.appendChild(article);
+          
+          setTimeout(() => {
+            article.style.opacity = '1';
+            article.style.transform = 'translateY(0)';
+          }, index * 100);
+        });
+      }
+    } catch (error) {
+      feedContainer.innerHTML = `
+        <div class="p-6 flex flex-col items-center justify-center h-full text-red-400 space-y-2">
+          <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+          <p class="text-sm">Connection to transfer wire lost.</p>
+        </div>
+      `;
+    }
+  }
+
+  // Fetch immediately if in browser
+  if (typeof window !== 'undefined') {
+    fetchTransfers();
+    // Refresh every 5 minutes
+    setInterval(fetchTransfers, 300000);
+  }
+</script>
