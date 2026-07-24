@@ -5,10 +5,15 @@ claimNumber: 5
 mathConcepts: ["R-squared", "Linear Regression"]
 published: true
 ---
+import CorrelationVisualizer from '../../components/CorrelationVisualizer.astro';
 
 If possession doesn't guarantee a win, what does? We can use the coefficient of determination, $R^2$, to measure how much of the variance in a team's points per season can be explained by a single metric.
 
 $$ R^2 = 1 - \frac{\sum (y_i - \hat{y}_i)^2}{\sum (y_i - \bar{y})^2} $$
+
+<div class="my-8">
+  <CorrelationVisualizer />
+</div>
 
 Here are some of the most surprising statistical correlations found when analyzing decades of soccer data.
 

@@ -1,0 +1,157 @@
+---
+// src/components/HomeAdvantageVisualizer.astro
+const id = "chart-" + Math.random().toString(36).substr(2, 9);
+---
+<div class="home-advantage-container" role="figure" aria-label="Home Advantage Data Visualization" class="w-full h-[400px] border border-gray-200 rounded-lg bg-slate-800 relative">
+  <div class="absolute top-4 left-4 z-10 flex space-x-2 bg-slate-900/80 p-2 rounded-lg border border-slate-700">
+    <button id="btn-pre-covid" class="px-3 py-1 bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold rounded transition-colors">Historical (With Fans)</button>
+    <button id="btn-covid" class="px-3 py-1 bg-slate-700 hover:bg-slate-600 text-white text-sm font-semibold rounded transition-colors">Ghost Games (Empty)</button>
+  </div>
+</div>
+
+<script>
+  import * as d3 from 'd3';
+
+  document.querySelectorAll('.home-advantage-container:not(.initialized)').forEach(container => {
+    container.classList.add('initialized');
+    let hasRendered = false;
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting && !hasRendered) {
+          hasRendered = true;
+          renderChart();
+          observer.disconnect();
+        }
+      });
+    }, { threshold: 0.1 });
+
+    observer.observe(container);
+
+    function renderChart() {
+      const width = container.clientWidth;
+      const height = container.clientHeight;
+      const margin = {top: 70, right: 30, bottom: 50, left: 60};
+      
+      const innerWidth = width - margin.left - margin.right;
+      const innerHeight = height - margin.top - margin.bottom;
+
+      const svg = d3.select(container)
+        .append('svg')
+        .attr('width', '100%')
+        .attr('height', '100%')
+        .attr('viewBox', `0 0 ${width} ${height}`)
+        .append('g')
+        .attr('transform', `translate(${margin.left},${margin.top})`);
+
+      const preCovid = [
+        { result: "Home Win", value: 46, color: "#3b82f6" },
+        { result: "Draw", value: 28, color: "#94a3b8" },
+        { result: "Away Win", value: 26, color: "#ef4444" }
+      ];
+
+      const covid = [
+        { result: "Home Win", value: 41, color: "#3b82f6" },
+        { result: "Draw", value: 27, color: "#94a3b8" },
+        { result: "Away Win", value: 32, color: "#ef4444" }
+      ];
+
+      const x = d3.scaleBand()
+        .domain(preCovid.map(d => d.result))
+        .range([0, innerWidth])
+        .padding(0.3);
+
+      const y = d3.scaleLinear()
+        .domain([0, 60])
+        .range([innerHeight, 0]);
+
+      // X Axis
+      svg.append("g")
+        .attr("transform", `translate(0,${innerHeight})`)
+        .call(d3.axisBottom(x))
+        .attr("color", "#94a3b8")
+        .selectAll("text")
+        .style("font-size", "14px");
+
+      // Y Axis
+      svg.append("g")
+        .call(d3.axisLeft(y).tickFormat(d => d + "%"))
+        .attr("color", "#94a3b8");
+
+      const bars = svg.selectAll("rect")
+        .data(preCovid)
+        .enter()
+        .append("rect")
+        .attr("x", d => x(d.result)!)
+        .attr("width", x.bandwidth())
+        .attr("y", innerHeight)
+        .attr("height", 0)
+        .attr("fill", d => d.color);
+
+      bars.transition()
+        .duration(800)
+        .delay((d, i) => i * 150)
+        .attr("y", d => y(d.value))
+        .attr("height", d => innerHeight - y(d.value));
+
+      const labels = svg.selectAll(".label")
+        .data(preCovid)
+        .enter()
+        .append("text")
+        .attr("class", "label")
+        .attr("x", d => x(d.result)! + x.bandwidth() / 2)
+        .attr("y", d => y(d.value) - 10)
+        .attr("text-anchor", "middle")
+        .attr("fill", "#ffffff")
+        .text(d => d.value + "%")
+        .style("opacity", 0);
+
+      labels.transition()
+        .duration(800)
+        .delay((d, i) => i * 150 + 400)
+        .style("opacity", 1);
+
+      // Buttons
+      const btnPre = container.querySelector('#btn-pre-covid');
+      const btnCovid = container.querySelector('#btn-covid');
+
+      btnPre?.addEventListener('click', () => {
+        btnPre.classList.replace('bg-slate-700', 'bg-blue-600');
+        btnPre.classList.replace('hover:bg-slate-600', 'hover:bg-blue-500');
+        btnCovid?.classList.replace('bg-blue-600', 'bg-slate-700');
+        btnCovid?.classList.replace('hover:bg-blue-500', 'hover:bg-slate-600');
+
+        bars.data(preCovid)
+          .transition()
+          .duration(500)
+          .attr("y", d => y(d.value))
+          .attr("height", d => innerHeight - y(d.value));
+
+        labels.data(preCovid)
+          .transition()
+          .duration(500)
+          .attr("y", d => y(d.value) - 10)
+          .text(d => d.value + "%");
+      });
+
+      btnCovid?.addEventListener('click', () => {
+        btnCovid.classList.replace('bg-slate-700', 'bg-blue-600');
+        btnCovid.classList.replace('hover:bg-slate-600', 'hover:bg-blue-500');
+        btnPre?.classList.replace('bg-blue-600', 'bg-slate-700');
+        btnPre?.classList.replace('hover:bg-blue-500', 'hover:bg-slate-600');
+
+        bars.data(covid)
+          .transition()
+          .duration(500)
+          .attr("y", d => y(d.value))
+          .attr("height", d => innerHeight - y(d.value));
+
+        labels.data(covid)
+          .transition()
+          .duration(500)
+          .attr("y", d => y(d.value) - 10)
+          .text(d => d.value + "%");
+      });
+    }
+  });
+</script>

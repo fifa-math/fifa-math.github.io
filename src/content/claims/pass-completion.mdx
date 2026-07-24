@@ -5,6 +5,7 @@ claimNumber: 8
 mathConcepts: ["Expected Threat (xT)"]
 published: true
 ---
+import PassCompletionVisualizer from '../../components/PassCompletionVisualizer.astro';
 
 A central defender might finish a match with a 98% pass completion rate and receive praise from pundits. However, modern soccer mathematics views raw pass completion as a fundamentally flawed metric because it treats all passes equally.
 
@@ -15,6 +16,10 @@ To solve this, analysts introduced **Expected Threat (xT)**. This model divides 
 When a player makes a pass, they change the ball's location from cell $A$ to cell $B$. The xT of the pass is simply the difference in the goal probability of those two cells:
 
 $$ xT = \text{Probability}(Goal | B) - \text{Probability}(Goal | A) $$
+
+<div class="my-8">
+  <PassCompletionVisualizer />
+</div>
 
 ## The Mathematics of Progression
 

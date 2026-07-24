@@ -1,0 +1,142 @@
+---
+// src/components/CorrelationVisualizer.astro
+---
+<div class="correlation-container" role="figure" aria-label="R-squared Correlation Visualization" class="w-full border border-gray-200 rounded-lg bg-slate-800 relative flex flex-col p-4 md:flex-row md:space-x-4">
+  <div class="flex-1 h-[300px] mb-4 md:mb-0 relative border border-slate-700 rounded bg-slate-900/50">
+    <div class="absolute top-2 left-2 text-white font-semibold text-sm">Wage Bill vs League Finish</div>
+    <div class="absolute top-8 left-2 text-green-400 font-mono text-xs font-bold">R² ≈ 0.70 (High)</div>
+    <div id="scatter-wage" class="w-full h-full"></div>
+  </div>
+  
+  <div class="flex-1 h-[300px] relative border border-slate-700 rounded bg-slate-900/50">
+    <div class="absolute top-2 left-2 text-white font-semibold text-sm">Distance Covered vs Points</div>
+    <div class="absolute top-8 left-2 text-red-400 font-mono text-xs font-bold">R² ≈ 0.05 (Low)</div>
+    <div id="scatter-dist" class="w-full h-full"></div>
+  </div>
+</div>
+
+<script>
+  import * as d3 from 'd3';
+
+  document.querySelectorAll('.correlation-container:not(.initialized)').forEach(container => {
+    container.classList.add('initialized');
+    let hasRendered = false;
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting && !hasRendered) {
+          hasRendered = true;
+          renderCharts();
+          observer.disconnect();
+        }
+      });
+    }, { threshold: 0.1 });
+
+    observer.observe(container);
+
+    function renderCharts() {
+      renderScatter('#scatter-wage', true);
+      renderScatter('#scatter-dist', false);
+    }
+
+    function renderScatter(selector: string, isHigh: boolean) {
+      const el = container.querySelector(selector);
+      if (!el) return;
+
+      const width = el.clientWidth;
+      const height = el.clientHeight;
+      const margin = { top: 40, right: 20, bottom: 40, left: 50 };
+      const innerW = width - margin.left - margin.right;
+      const innerH = height - margin.top - margin.bottom;
+
+      const svg = d3.select(el)
+        .append('svg')
+        .attr('width', '100%')
+        .attr('height', '100%')
+        .attr('viewBox', `0 0 ${width} ${height}`)
+        .append('g')
+        .attr('transform', `translate(${margin.left},${margin.top})`);
+
+      // Generate Data
+      const numPoints = 20; // 20 teams
+      const data: {x: number, y: number}[] = [];
+
+      for (let i = 0; i < numPoints; i++) {
+        if (isHigh) {
+          // High correlation: y is heavily dependent on x
+          const x = Math.random() * 100;
+          const y = x * 0.8 + (Math.random() * 20 - 10); // Tight variance
+          data.push({ x, y });
+        } else {
+          // Low correlation: pure randomness
+          const x = Math.random() * 100;
+          const y = Math.random() * 100; // No relation
+          data.push({ x, y });
+        }
+      }
+
+      const xScale = d3.scaleLinear().domain([0, 100]).range([0, innerW]);
+      const yScale = d3.scaleLinear().domain([0, 100]).range([innerH, 0]);
+
+      // Axes
+      svg.append("g")
+        .attr("transform", `translate(0,${innerH})`)
+        .call(d3.axisBottom(xScale).ticks(5).tickFormat(() => ""))
+        .attr("color", "#475569");
+        
+      svg.append("g")
+        .call(d3.axisLeft(yScale).ticks(5).tickFormat(() => ""))
+        .attr("color", "#475569");
+
+      // Points
+      const color = isHigh ? "#4ade80" : "#f87171";
+      
+      svg.selectAll("circle")
+        .data(data)
+        .enter()
+        .append("circle")
+        .attr("cx", d => xScale(d.x))
+        .attr("cy", innerH) // Start at bottom for animation
+        .attr("r", 5)
+        .attr("fill", color)
+        .attr("opacity", 0.7)
+        .attr("stroke", "#ffffff")
+        .attr("stroke-width", 1)
+        .transition()
+        .duration(1000)
+        .delay((d, i) => i * 50)
+        .attr("cy", d => yScale(d.y));
+
+      // Trendline calculation (least squares)
+      const xMean = d3.mean(data, d => d.x) || 0;
+      const yMean = d3.mean(data, d => d.y) || 0;
+      let num = 0, den = 0;
+      data.forEach(d => {
+        num += (d.x - xMean) * (d.y - yMean);
+        den += (d.x - xMean) * (d.x - xMean);
+      });
+      const m = num / den;
+      const b = yMean - m * xMean;
+
+      // Draw trendline
+      const x1 = 0;
+      const y1 = m * x1 + b;
+      const x2 = 100;
+      const y2 = m * x2 + b;
+
+      svg.append("line")
+        .attr("x1", xScale(x1))
+        .attr("y1", yScale(y1))
+        .attr("x2", xScale(x1)) // start collapsed
+        .attr("y2", yScale(y1)) // start collapsed
+        .attr("stroke", "white")
+        .attr("stroke-width", 2)
+        .attr("stroke-dasharray", "5,5")
+        .transition()
+        .delay(1500)
+        .duration(1000)
+        .attr("x2", xScale(x2))
+        .attr("y2", yScale(y2));
+    }
+  });
+</script>

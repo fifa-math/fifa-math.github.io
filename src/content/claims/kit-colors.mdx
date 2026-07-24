@@ -5,6 +5,7 @@ claimNumber: 7
 mathConcepts: ["p-values", "Contrast Algorithms"]
 published: true
 ---
+import KitColorVisualizer from '../../components/KitColorVisualizer.astro';
 
 Can the color of a team's shirt mathematically alter the probability of winning? The data suggests yes.
 
@@ -21,6 +22,10 @@ The theory relies on evolutionary psychology: red signals dominance and aggressi
 Aside from psychology, kit colors play a crucial role in peripheral visual processing. 
 
 A player scanning the pitch to make a split-second pass relies on color contrast against the green turf. We can measure this using relative luminance formulas (often used in web accessibility design):
+
+<div class="my-8">
+  <KitColorVisualizer />
+</div>
 
 $$ L = 0.2126R + 0.7152G + 0.0722B $$
 

@@ -5,8 +5,13 @@ claimNumber: 6
 mathConcepts: ["Poisson Regression", "Statistical Significance"]
 published: true
 ---
+import HomeAdvantageVisualizer from '../../components/HomeAdvantageVisualizer.astro';
 
 Historically, home teams in professional football win roughly 46% of their matches, while away teams win only 26% (with the rest being draws). This implies a massive structural advantage. 
+
+<div class="my-8">
+  <HomeAdvantageVisualizer />
+</div>
 
 We can quantify this advantage using a **Poisson regression model** to predict the number of goals scored by team $i$ against team $j$:
 
