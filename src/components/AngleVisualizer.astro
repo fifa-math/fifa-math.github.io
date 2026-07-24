@@ -6,7 +6,7 @@ export interface Props {
 const { goalWidth } = Astro.props;
 ---
 <div class="w-full flex flex-col items-center">
-  <div class="angle-info" role="figure" aria-label="AngleVisualizer Data Visualization" class="text-xl font-bold mb-4 text-blue-400">Angle: 0°</div>
+  <div class="angle-info text-xl font-bold mb-4 text-blue-400" role="figure" aria-label="AngleVisualizer Data Visualization">Angle: 0°</div>
   <div id="angle-container" class="w-full h-[500px] border border-gray-200 rounded-lg bg-green-800 relative cursor-crosshair overflow-hidden" data-goal-width={goalWidth}>
   </div>
   <p class="mt-2 text-sm text-gray-400">Drag the white dot along the right flank to see the angle change.</p>
