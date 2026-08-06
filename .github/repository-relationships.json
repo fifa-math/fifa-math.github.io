@@ -1,0 +1,106 @@
+{
+  "$schema": "./repository-relationships.schema.json",
+  "audience": "public",
+  "generated": {
+    "complete_for_visibility": "public",
+    "generated_at": "2026-08-05T23:41:16Z",
+    "generator_version": "2026-08-04.1",
+    "inventory_digest": "sha256:32ce75a5871bb126f0a0f79a6f1ad6f76683f1387674c60ecd05a93b31a630ab",
+    "managed_by": "ore-repository-relationship-rollout",
+    "omitted_repository_count": 0,
+    "private_repositories_omitted": false,
+    "source": "GitHub GraphQL repository inventory plus reviewed manual declarations"
+  },
+  "owner": {
+    "account_type": "organization",
+    "dotgithub_repository": "fifa-math/.github",
+    "github_id": "308572676",
+    "linear_project": {
+      "id": "1ffb64f1-af3f-4b5e-b6ac-55d00ee52b74",
+      "name": "github.com/fifa-math",
+      "team_id": "eb8ab169-5afe-4b6f-9cab-3f2aa3e887dc",
+      "url": "https://linear.app/denman/project/githubcomfifa-math-06015d19054a",
+      "workspace": "denman"
+    },
+    "login": "fifa-math",
+    "mapping_id": "context:fifa-math"
+  },
+  "private_registry": {
+    "contains_non_public_inventory": false,
+    "digest": "sha256:8b95a3c1138444ea91ec3d6e87e029ca4239d0293676d6b39586395cb2876f49",
+    "path": "owners/fifa-math.json",
+    "repository": "approved-private-registry"
+  },
+  "relationships": [
+    {
+      "confidence": 1.0,
+      "evidence": [
+        {
+          "kind": "github-owner-membership",
+          "source": "GitHub GraphQL repository inventory"
+        }
+      ],
+      "from": "fifa-math/.github",
+      "id": "sha256:5f9e61c84eb4c3bedbe48ae7200ea908fb203bad0ff10d75c5f14b0080c1cba2",
+      "notes": "Organization .github policy and community-health defaults govern this sibling repository.",
+      "required": true,
+      "scope": "organization",
+      "status": "declared",
+      "to": "fifa-math/fifa-math.github.io",
+      "type": "governs"
+    },
+    {
+      "confidence": 0.95,
+      "evidence": [
+        {
+          "kind": "repository-name",
+          "value": "fifa-math.github.io"
+        }
+      ],
+      "from": "fifa-math/fifa-math.github.io",
+      "id": "sha256:f0fcd7b84adbfa4a63962b54d1f56e6d8ff281f13c0ee5951f9b948f76e41c81",
+      "notes": "The conventional *.github.io repository documents the organization profile.",
+      "required": false,
+      "scope": "organization",
+      "status": "inferred",
+      "to": "fifa-math/.github",
+      "type": "documents"
+    }
+  ],
+  "repositories": [
+    {
+      "archived": false,
+      "default_branch": "main",
+      "fork": false,
+      "full_name": "fifa-math/.github",
+      "github_id": "1324266848",
+      "name": ".github",
+      "owner": "fifa-math",
+      "roles": [
+        "community-health",
+        "governance",
+        "relationship-registry"
+      ],
+      "source": "github-graphql-api",
+      "url": "https://github.com/fifa-math/.github",
+      "visibility": "public"
+    },
+    {
+      "archived": false,
+      "default_branch": "main",
+      "fork": false,
+      "full_name": "fifa-math/fifa-math.github.io",
+      "github_id": "1310508181",
+      "name": "fifa-math.github.io",
+      "owner": "fifa-math",
+      "roles": [
+        "documentation-site"
+      ],
+      "source": "github-graphql-api",
+      "url": "https://github.com/fifa-math/fifa-math.github.io",
+      "visibility": "public"
+    }
+  ],
+  "schema_version": 1,
+  "unresolved_hints": []
+}
